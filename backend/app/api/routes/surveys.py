@@ -35,3 +35,84 @@ def create_survey(
     db.refresh(survey)
 
     return survey
+
+@router.get('/', response_model=list[SurveyRead])
+def get_surveys(db: session = Depends(get_db)):
+    return db.scalars(select(Survey)).all()
+
+
+router.get('/users/{user_id}', reponse_model=list[SurveyRead])
+def get_surveys_by_user(
+        user_id:UUID,
+        db: Session = Depends(get_db),
+):
+    user = db.get(User, user_id)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='User not found',
+        )
+
+    return db.scalars(
+        select(Survey).where(Survey.user_id == user_id)
+    ).all()
+
+
+@router.get('/{survey_id}', response_model=SurveyRead)
+def get_survey(
+        survey_id: UUID, db: Session = Depends(get_db),
+):
+    survey = db.get(Survey, survey_id)
+
+    if not survey:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Survey not found',
+        )
+
+    return survey
+
+
+@router.patch('/{survey_id}', response_model=SurveyRead)
+def update_survey(
+        survey_id: UUID,
+        survey_data: SurveyUpdate,
+        db: Session = Depends(get_db),
+):
+    survey =  db.get(Survey, survey_id)
+
+    if not survey:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Survey not found',
+        )
+
+    update_data = survey_data.model_dump(exclude_unset=True)
+
+    for key, value in update_data.items():
+        setattr(survey, key, value)
+
+    db.commit()
+    db.refresh(survey)
+
+    return survey
+
+
+@router.delete('/{survey_id}', status_code=status.HTTP_204_NO_CONTENT)
+def delete_survey(
+        survey_id: UUID,
+        db: Session = Depends(get_db),
+):
+    survey = db.get(Survey, survey_id)
+
+    if not survey:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Survey not found',
+        )
+
+    db.delete(survey)
+    db.commit()
+
+    return None
