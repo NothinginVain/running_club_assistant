@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.models.survey import Survey
 from app.models.user import User
-from app.shemas.survey import SurveyCreate, SurveyRead, SurveyUpdate
+from app.schemas.survey import SurveyCreate, SurveyRead, SurveyUpdate
 
 router = APIRouter( prefix='/surveys',tags=['Surveys'],)
 
@@ -41,7 +41,7 @@ def get_surveys(db: session = Depends(get_db)):
     return db.scalars(select(Survey)).all()
 
 
-router.get('/users/{user_id}', reponse_model=list[SurveyRead])
+@router.get('/users/{user_id}', response_model=list[SurveyRead])
 def get_surveys_by_user(
         user_id:UUID,
         db: Session = Depends(get_db),

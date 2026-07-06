@@ -12,7 +12,7 @@ from app.db.base import Base
 from app.models.enums import RecommendationType
 
 class Survey(Base):
-    __tablename__ = "survey"
+    __tablename__ = "surveys"
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),

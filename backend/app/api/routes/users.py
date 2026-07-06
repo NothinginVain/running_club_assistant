@@ -6,11 +6,11 @@ from sqlalchemy.orm import  Session
 
 from app.db.session import  get_db
 from app.models.user import User
-from app.shemas.user import UserCreate, UserRead, UserUpdate
+from app.schemas.user import UserCreate, UserRead, UserUpdate
 
 router = APIRouter(prefix='/users',tags=['Users'])
 
-@router.get('/', reponse_model=UserRead, status_code=status.HTTP_201_CREATED)
+@router.post('/', response_model=UserRead, status_code=status.HTTP_201_CREATED)
 def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
     existing_user = db.scalar(
         select(User).where(User.email == user_data.email)
@@ -59,7 +59,7 @@ def get_user(user_id: UUID, db: Session = Depends(get_db)):
     return user
 
 
-@router.patch('/{user_id}', reponse_model=UserRead)
+@router.patch('/{user_id}', response_model=UserRead)
 def update_user(
     user_id: UUID,
     user_data: UserUpdate,

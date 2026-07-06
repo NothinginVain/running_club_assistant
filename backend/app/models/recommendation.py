@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+from email.policy import default
 from typing import Any
 
 from sqlalchemy import (
@@ -31,6 +32,12 @@ class Recommendation(Base):
             name='check_feedback_rating_range',
         ),
 
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
     )
 
     survey_id: Mapped[uuid.UUID] = mapped_column(

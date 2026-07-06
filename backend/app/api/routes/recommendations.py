@@ -50,7 +50,7 @@ def create_recommendation(
     return recommendation
 
 
-@route.get('/', reponse_model=list[RecommendationRead])
+@router.get('/', response_model=list[RecommendationRead])
 def get_recommendations(db: Session = Depends(get_db)):
     return db.scalars(select(Recommendation)).all()
 
@@ -80,7 +80,7 @@ def get_recommendations_by_survey(
 
     if not survey:
         raise HTTPException(
-            status_code=satus.HTTP_404_NOT_FOUND,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail='Survey not found',
         )
 
@@ -89,3 +89,65 @@ def get_recommendations_by_survey(
     ).all()
 
 
+@router.patch('/{recommendation_id}/feedback', response_model=RecommendationRead)
+def update_recommendation_feedback(
+        recommendation_id: UUID,
+        feedback_data: RecommendationFeedbackUpdate,
+        db: Session = Depends(get_db),
+):
+    recommendation = db.get(Recommendation, recommendation_id)
+
+    if not recommendation:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Recommendation not found',
+        )
+
+    recommendation.feedback_rating = feedback_data.feedback_rating
+    recommendation.feedback_comment = feedback_data.feedback_comment
+
+    db.commit()
+    db.refresh(recommendation)
+
+    return recommendation
+
+
+@router.patch('/{recommendation_id}/favorite', response_model=RecommendationRead)
+def update_recommendation_favorite(
+        recommendation_id: UUID,
+        favorite_data: RecommendationFavoriteUpdate,
+        db: Session = Depends(get_db)
+):
+    recommendation = db.get(Recommendation, recommendation_id)
+
+    if not recommendation:
+        raise HTTPException(
+            stauts_code=status.HTTP_404_NOT_FOUND,
+            detail='Recommendation not found',
+        )
+
+    recommendation.is_favorite = favorite_data.is_favorite
+
+    db.commit()
+    db.refresh(recommendation)
+
+    return recommendation
+
+
+@router.delete('/{recommendation_id}', status_code=status.HTTP_204_NO_CONTENT)
+def delete_recommendation(
+        recommendation_id: UUID,
+        db: Session = Depends(get_db)
+):
+    recommendation = db.get(Recommendation, recommendation_id)
+
+    if not recommendation:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Recommendation not found',
+        )
+
+    db.delete(recommendation)
+    db.commit()
+
+    return None
