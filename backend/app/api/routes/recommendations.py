@@ -55,23 +55,7 @@ def get_recommendations(db: Session = Depends(get_db)):
     return db.scalars(select(Recommendation)).all()
 
 
-@router.get('/{recommendation_id}', response_model=RecommendationRead)
-def get_recommendation(
-        recommendation_id: UUID,
-        db: Session = Depends(get_db),
-):
-    recommendation = db.get(Recommendation, recommendation_id)
-
-    if not recommendation:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail='Recommendation not found',
-        )
-
-    return  recommendation
-
-
-@router.get('/survey/{survey_id}/items', response_model=list[RecommendationRead])
+@router.get('/survey/{survey_id}', response_model=list[RecommendationRead])
 def get_recommendations_by_survey(
         survey_id: UUID,
         db: Session = Depends(get_db),
@@ -87,6 +71,22 @@ def get_recommendations_by_survey(
     return db.scalars(
         select(Recommendation).where(Recommendation.survey_id == survey_id)
     ).all()
+
+
+@router.get('/{recommendation_id}', response_model=RecommendationRead)
+def get_recommendation(
+        recommendation_id: UUID,
+        db: Session = Depends(get_db),
+):
+    recommendation = db.get(Recommendation, recommendation_id)
+
+    if not recommendation:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Recommendation not found',
+        )
+
+    return  recommendation
 
 
 @router.patch('/{recommendation_id}/feedback', response_model=RecommendationRead)
@@ -122,7 +122,7 @@ def update_recommendation_favorite(
 
     if not recommendation:
         raise HTTPException(
-            stauts_code=status.HTTP_404_NOT_FOUND,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail='Recommendation not found',
         )
 
