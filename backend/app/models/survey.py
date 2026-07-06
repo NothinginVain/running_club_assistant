@@ -32,7 +32,7 @@ class Survey(Base):
         nullable=False,
     )
 
-    answer: Mapped[dict[str, Any]] = mapped_column(
+    answers: Mapped[dict[str, Any]] = mapped_column(
         JSONB,
         nullable=False,
     )
@@ -40,7 +40,6 @@ class Survey(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
-        onupdate=func.now(),
         nullable=False,
     )
 
@@ -52,11 +51,10 @@ class Survey(Base):
     )
 
     user: Mapped['User'] = relationship(
-        back_populates="survey",
-        cascade="all, delete-orphan",
+        back_populates="surveys",
     )
 
-    recommendation_type: Mapped[list['Recommendation']] = relationship(
+    recommendations: Mapped[list['Recommendation']] = relationship(
         back_populates="survey",
         cascade="all, delete-orphan",
     )

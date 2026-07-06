@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from email.policy import default
 from typing import Any
 
 from sqlalchemy import (
@@ -52,17 +51,17 @@ class Recommendation(Base):
         nullable=False,
     )
 
-    title: Mapped[String] = mapped_column(
+    title: Mapped[str] = mapped_column(
         String(200),
         nullable=False,
     )
 
-    content: Mapped[dict[String, Any]] = mapped_column(
+    content: Mapped[dict[str, Any]] = mapped_column(
         JSONB,
         nullable=False,
     )
 
-    explanation: Mapped[dict[String, Any] | None] = mapped_column(
+    explanation: Mapped[dict[str, Any] | None] = mapped_column(
         JSONB,
         nullable=True,
     )

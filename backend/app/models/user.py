@@ -46,12 +46,17 @@ class User(Base):
         nullable=True,
     )
 
+    social_media: Mapped[dict[str | Any] | None] = mapped_column(
+        JSONB,
+        nullable=True,
+    )
+
     shoe_size: Mapped[str | None] = mapped_column(
         String(20),
         nullable=True,
     )
 
-    interests: Mapped[str | None] = mapped_column(
+    interests: Mapped[list[str] | None] = mapped_column(
         JSONB,
         nullable=True,
     )
@@ -59,7 +64,6 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
-        onupdate=func.now(),
         nullable=False,
     )
 

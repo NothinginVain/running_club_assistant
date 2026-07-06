@@ -10,6 +10,9 @@ from app.schemas.user import UserCreate, UserRead, UserUpdate
 
 router = APIRouter(prefix='/users',tags=['Users'])
 
+def fake_hash_password(password):
+    return 'fakehashed_' + password
+
 @router.post('/', response_model=UserRead, status_code=status.HTTP_201_CREATED)
 def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
     existing_user = db.scalar(
@@ -28,9 +31,9 @@ def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
         password_hash=fake_hash_password(user_data.password),
         gender=user_data.gender,
         birth=user_data.birth,
-        address=user_data.adress,
+        address=user_data.address,
         social_media=user_data.social_media,
-        shoes_size=user_data.shoe_size,
+        shoe_size=user_data.shoe_size,
         interests=user_data.interests,
     )
 

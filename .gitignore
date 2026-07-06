@@ -1,5 +1,95 @@
-.venv/
+# -------------------------
+# Python
+# -------------------------
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.mypy_cache/
+.ruff_cache/
+
+# -------------------------
+# Environment variables
+# -------------------------
 .env
+.env.*
+!.env.example
+
+# -------------------------
+# FastAPI / backend
+# -------------------------
+*.log
+logs/
+
+# SQLite local test databases
+*.sqlite
+*.sqlite3
+*.db
+
+# -------------------------
+# Alembic
+# -------------------------
+# Keep migrations tracked, ignore temporary files only
+alembic/__pycache__/
+app/**/__pycache__/
+
+# -------------------------
+# Node / Next.js frontend
+# -------------------------
+node_modules/
+.next/
+out/
+.vercel/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local frontend env files
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# -------------------------
+# IDEs / editors
+# -------------------------
+.idea/
+.vscode/
+*.swp
+*.swo
 .DS_Store
+
+# -------------------------
+# macOS
+# -------------------------
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# -------------------------
+# Misc
+# -------------------------
+*.bak
+*.tmp
+*.temp

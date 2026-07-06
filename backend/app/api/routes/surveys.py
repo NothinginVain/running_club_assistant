@@ -27,7 +27,7 @@ def create_survey(
     survey = Survey(
         user_id=user_id,
         survey_type=survey_data.survey_type,
-        answer=survey_data.answers,
+        answers=survey_data.answers,
     )
 
     db.add(survey)
@@ -37,7 +37,7 @@ def create_survey(
     return survey
 
 @router.get('/', response_model=list[SurveyRead])
-def get_surveys(db: session = Depends(get_db)):
+def get_surveys(db: Session = Depends(get_db)):
     return db.scalars(select(Survey)).all()
 
 
