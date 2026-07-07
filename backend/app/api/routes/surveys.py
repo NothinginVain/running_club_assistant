@@ -41,6 +41,33 @@ def get_surveys(db: Session = Depends(get_db)):
     return db.scalars(select(Survey)).all()
 
 
+@router.get('/users/{user_id}/latest', response_model=SurveyRead)
+def get_latest_survey_by_user(
+        user_id: UUID,
+        db: Session = Depends(get_db),
+):
+    user = db.get(User, user_id)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='User not found',
+        )
+
+    survey = db.scalars(
+        select(Survey).where(Survey.user_id == user_id)
+        .order_by(Survey.created_at.desc()).limit(1)
+    ).first()
+
+    if not survey:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='No surveys found for this user',
+        )
+
+    return survey
+
+
 @router.get('/users/{user_id}', response_model=list[SurveyRead])
 def get_surveys_by_user(
         user_id:UUID,
