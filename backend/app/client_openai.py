@@ -128,15 +128,15 @@ Return JSON in exactly this structure:
 
  '''
 
-def get_recommendation(survey: str) -> dict:
+def get_recommendation(survey: dict) -> dict:
     response = client.responses.create(
         model="gpt-5-mini",
         instructions=INSTRUCTIONS,
-        input=survey,
+        input=json.dumps(survey),
     )
 
     data = json.loads(response.output_text)
-
+    return data
     print(json.dumps(data, indent=4))
 
 

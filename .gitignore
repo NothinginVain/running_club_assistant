@@ -93,3 +93,4 @@ frontend/.env.*
 *.bak
 *.tmp
 *.temp
+AGENTS.md

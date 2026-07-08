@@ -21,36 +21,33 @@ router = APIRouter(
 )
 
 
-# @router.post('/', response_model=RecommendationRead, status_code=status.HTTP_201_CREATED)
-@router.post('/')
-def create_recommendation():
+@router.post('/', response_model=RecommendationRead, status_code=status.HTTP_201_CREATED)
+def create_recommendation(
+        recommendation_data: RecommendationCreate,
+        db: Session = Depends(get_db),
+):
+    survey = db.get(Survey, recommendation_data.survey_id)
 
-    return {'status':4}
-#         recommendation_data: RecommendationCreate,
-#         db: Session = Depends(get_db),
-# ):
-#     survey = db.get(Survey, recommendation_data.survey_id)
-#
-#     if not survey:
-#         raise HTTPException(
-#             status_code=status.HTTP_404_NOT_FOUND,
-#             detail='Survey not found',
-#         )
-#
-#     recommendation = Recommendation(
-#         survey_id=recommendation_data.survey_id,
-#         recommendation_type=recommendation_data.recommendation_type,
-#         title=recommendation_data.title,
-#         content=recommendation_data.content,
-#         explanation=recommendation_data.explanation,
-#         survey_snapshot=survey.answers,
-#     )
-#
-#     db.add(recommendation)
-#     db.commit()
-#     db.refresh(recommendation)
-#
-#     return recommendation
+    if not survey:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Survey not found',
+        )
+
+    recommendation = Recommendation(
+        survey_id=recommendation_data.survey_id,
+        recommendation_type=recommendation_data.recommendation_type,
+        title=recommendation_data.title,
+        content=recommendation_data.content,
+        explanation=recommendation_data.explanation,
+        survey_snapshot=survey.answers,
+    )
+
+    db.add(recommendation)
+    db.commit()
+    db.refresh(recommendation)
+
+    return recommendation
 
 
 @router.get('/', response_model=list[RecommendationRead])

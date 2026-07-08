@@ -46,7 +46,7 @@ class User(Base):
         nullable=True,
     )
 
-    social_media: Mapped[dict[str | Any] | None] = mapped_column(
+    social_media: Mapped[dict[str , Any] | None] = mapped_column(
         JSONB,
         nullable=True,
     )
