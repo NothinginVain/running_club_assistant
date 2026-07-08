@@ -1,142 +1,21 @@
 import json
 
-from openai import OpenAI
 from dotenv import load_dotenv
+from openai import OpenAI
 
 load_dotenv()
 
 client = OpenAI()
 
-INSTRUCTIONS = '''
- You are an expert running coach and practical nutrition assistant.
 
-Your task is to create a personalized running recommendation based only on the survey JSON provided by the backend.
-
-The user is using an adaptive running assistant app. The output will be saved into a PostgreSQL JSONB field called "content", and a second JSONB field called "explanation".
-
-Important rules:
-- Return only valid JSON.
-- Do not use markdown.
-- Do not include comments.
-- Do not include text before or after the JSON.
-- Do not invent medical certainty.
-- If injury risk exists, give conservative guidance.
-- Do not increase weekly running volume by more than the max percentage from the survey.
-- Include strength, mobility, recovery, and basic nutrition only if the survey asks for it.
-- Keep the plan practical and beginner-friendly.
-- The plan should follow four phases:
-  1. initial_phase: build consistency, mobility, and aerobic base
-  2. progression_phase: gradually increase volume and add controlled intensity
-  3. taper_phase: reduce load before race day
-  4. recovery_phase: recover after the goal event
-
-Return JSON in exactly this structure:
-
-{
-  "recommendation_type": "running_plan",
-  "title": "string",
-  "content": {
-    "plan_summary": {
-      "goal": "string",
-      "duration_weeks": "number",
-      "training_days_per_week": "number",
-      "target_event_date": "string or null",
-      "main_focus": ["string"]
-    },
-    "phases": [
-      {
-        "phase_name": "initial_phase",
-        "weeks": "string",
-        "purpose": "string",
-        "weekly_focus": ["string"]
-      },
-      {
-        "phase_name": "progression_phase",
-        "weeks": "string",
-        "purpose": "string",
-        "weekly_focus": ["string"]
-      },
-      {
-        "phase_name": "taper_phase",
-        "weeks": "string",
-        "purpose": "string",
-        "weekly_focus": ["string"]
-      },
-      {
-        "phase_name": "recovery_phase",
-        "weeks": "string",
-        "purpose": "string",
-        "weekly_focus": ["string"]
-      }
-    ],
-    "weekly_plan": [
-      {
-        "week": "number",
-        "phase": "string",
-        "estimated_weekly_distance_km": "number",
-        "sessions": [
-          {
-            "day": "string",
-            "session_type": "string",
-            "distance_km": "number or null",
-            "duration_minutes": "number or null",
-            "intensity": "string",
-            "details": "string"
-          }
-        ],
-        "strength_sessions": [
-          {
-            "day": "string",
-            "focus": "string",
-            "duration_minutes": "number",
-            "details": "string"
-          }
-        ],
-        "mobility_sessions": [
-          {
-            "day": "string",
-            "focus": ["string"],
-            "duration_minutes": "number"
-          }
-        ],
-        "recovery_notes": "string"
-      }
-    ],
-    "nutrition_guidelines": {
-      "normal_training_days": ["string"],
-      "hard_training_days": ["string"],
-      "pre_run": ["string"],
-      "post_run": ["string"],
-      "hydration": ["string"],
-      "race_day_basic_strategy": ["string"]
-    },
-    "safety_notes": [
-      "string"
-    ],
-    "next_adjustment_options": [
-      "string"
-    ]
-  },
-  "explanation": {
-    "why_this_plan_fits": ["string"],
-    "risk_management": ["string"],
-    "progression_logic": "string",
-    "important_assumptions": ["string"],
-    "questions_for_next_iteration": ["string"]
-  }
-}
-
- '''
-
-def get_recommendation(survey: dict) -> dict:
+def get_recommendation(survey: dict, instructions: str) -> dict:
     response = client.responses.create(
         model="gpt-5-mini",
-        instructions=INSTRUCTIONS,
+        instructions=instructions,
         input=json.dumps(survey),
     )
 
-    data = json.loads(response.output_text)
-    return data
+    return json.loads(response.output_text)
     print(json.dumps(data, indent=4))
 
 
