@@ -1,5 +1,5 @@
 import json
-
+from langfuse import observe
 import requests
 from app.client_openai import get_recommendation
 from app.prompts.running_plan_prompt import get_running_plan_prompt
