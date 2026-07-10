@@ -15,9 +15,9 @@ def get_latest_survey(user_id):
 
 
 # 2 - calling openAI to send the survey get the recommendation
-def generate_recommendation(survey):
-    instructions = get_running_plan_prompt(version='simple2')
-    return get_recommendation((survey['answers']), instructions)
+def generate_recommendation(survey, prompt_version='simple'):
+    instructions = get_running_plan_prompt(prompt_version)
+    return get_recommendation((survey['answers']), instructions, prompt_version)
 
 
 # 3 - construct the full recommendation package which is aligned with data schema
@@ -37,10 +37,10 @@ def save_recommendation(payload):
     response.raise_for_status()
     return response.json()
 
-
-def execute_recommendation(user_id):
+@observe(name='recommendation_execution')
+def execute_recommendation(user_id, prompt_version='simple'):
     survey = get_latest_survey(user_id)
-    recommendation = generate_recommendation(survey)
+    recommendation = generate_recommendation(survey, prompt_version)
     payload = build_recommendation_package(survey, recommendation)
     saved_recommendation = save_recommendation(payload)
     return saved_recommendation
@@ -48,6 +48,6 @@ def execute_recommendation(user_id):
 if __name__ == '__main__':
     test_user_id = '328cae0c-b9fe-4d3e-ac20-7fc642b406e1'
     result = execute_recommendation(test_user_id)
-    print(json.dumps(result, indent=4))
+    print(json.dumps(result, indent=4, ensure_ascii=False))
 
 # uvicorn app.main:app --reload --port 5002  -> to be able activate the apis thro terminal

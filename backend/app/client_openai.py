@@ -1,5 +1,5 @@
 import json
-
+from typing import Any
 from dotenv import load_dotenv
 from langfuse.openai import OpenAI
 
@@ -8,11 +8,16 @@ load_dotenv()
 client = OpenAI()
 
 
-def get_recommendation(survey: dict, instructions: str) -> dict:
+def get_recommendation(survey: dict, instructions: str, prompt_version: str) -> dict[str, Any]:
     response = client.responses.create(
         model="gpt-5-mini",
         instructions=instructions,
         input=json.dumps(survey),
+        metadata={
+            "feature": "running_plan",
+            "environment": "local_backend",
+            "prompt_version": prompt_version,
+        },
     )
 
     return json.loads(response.output_text)
