@@ -24,7 +24,7 @@ def generate_recommendation(survey, prompt_version='simple'):
 def build_recommendation_package(survey: dict, recommendation: dict):
     return {
         'survey_id': survey['id'],
-        'recommendation_type': recommendation['recommendation_type'],
+        'recommendation_type': survey['survey_type'],
         'title': recommendation['title'],
         'content': recommendation['content'],
         'explanation': recommendation.get('explanation'),

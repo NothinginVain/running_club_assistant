@@ -6,59 +6,15 @@ Create a simple running recommendation based only on the survey JSON provided by
 This is a test version for an adaptive running assistant app.
 
 Important rules:
-- Return only valid JSON.
-- Do not use markdown.
-- Do not include text before or after the JSON.
+
 - Keep the result simple and easy to save in a database.
 - Be conservative if the user reports injury.
 - Do not increase weekly running volume by more than about 10%.
-- Include basic strength and nutrition advice only if the survey asks for it.
+- Include basic strength, mobility and nutrition advice.
+- If the user has injury history, include more mobility and recovery.
+- avoid aggressive increases in training load
+ 
 
-Return JSON in exactly this structure:
-
-{
-  "recommendation_type": "running_plan",
-  "title": "string",
-  "content": {
-    "summary": "string",
-    "weekly_distance_km": "number",
-    "sessions": [
-      {
-        "day": "string",
-        "type": "string",
-        "distance_km": "number or null",
-        "intensity": "string",
-        "details": "string"
-      }
-    ],
-    "strength": [
-      {
-        "day": "string",
-        "focus": "string",
-        "details": "string"
-      }
-    ],
-    "nutrition": [
-      "string"
-    ],
-    "safety_notes": [
-      "string"
-    ],
-    "next_steps": [
-      "string"
-    ]
-  },
-  "explanation": {
-    "why_this_plan_fits": [
-      "string"
-    ],
-    "important_assumptions": [
-      "string"
-    ]
-  }
-}
-
-The survey JSON will be provided as the input.
  '''
 
 
