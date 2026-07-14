@@ -4,9 +4,12 @@ import requests
 from app.client_openai import get_recommendation
 from app.prompts.running_plan_prompt import get_running_plan_prompt
 from app.prompts.running_plan_input import build_running_plan_input
+from dotenv import load_dotenv
+import os
 
-BASE_URL = 'http://127.0.0.1:5002'
+load_dotenv()
 
+BASE_URL = os.getenv('BASE_URL')
 
 def get_user(user_id):
     response = requests.get(f'{BASE_URL}/users/{user_id}')
