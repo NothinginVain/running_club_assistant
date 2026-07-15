@@ -1,4 +1,5 @@
 import json
+
 from langfuse import observe
 import requests
 from app.client_openai import get_recommendation
@@ -60,6 +61,24 @@ def save_recommendation(payload):
         print("Recommendation API error:")
         print(response.text)
 
+
+    response.raise_for_status()
+    return response.json()
+
+
+def update_favorite_recommendation(recommendation_id, favorite):
+    payload = {
+       'is_favorite': favorite,
+   }
+
+    response = requests.patch(
+        f'{BASE_URL}/recommendations/{recommendation_id}/favorite',
+        json=payload,
+    )
+
+    if not response.ok:
+        print("Recommendation API error:")
+        print(response.text)
 
     response.raise_for_status()
     return response.json()

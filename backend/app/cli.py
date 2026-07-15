@@ -1,4 +1,4 @@
-from app.services.recommendation_manager import execute_recommendation
+from app.services.recommendation_manager import execute_recommendation, update_favorite_recommendation
 from app.services.survey_manager import (
     save_survey,
     build_survey_package,
@@ -11,9 +11,10 @@ def show_menu():
     print(
         """
 0 - Exit
-1 - Survey
-2 - Recommendation
-3 - Feedback
+1 - Create running plan
+3 - Feedback / Generate new running plan
+4 - Recommendations view 
+5 - add Favorite Recommendations 
 """
     )
 
@@ -48,6 +49,22 @@ def run_cli():
         elif user_input == 3:
             execute_feedback_recommendation(recommendation_id)
             print("Feedback executed.")
+
+        elif user_input == 5:
+           favorite_input = input('Set favorite? true/false:').strip().lower()
+
+           if favorite_input == 'true':
+               favorite = True
+
+           elif favorite_input == 'false':
+               valor = False
+           else:
+               print('Invalid option. Please choose 0, 1, 2, 3 or 4')
+
+           update_favorite_recommendation(recommendation_id, favorite)
+           print(
+               f"Recommendation {recommendation_id} is now set as favorite: {favorite}"
+           )
 
         else:
             print("Invalid option. Please choose 0, 1, 2, or 3.")

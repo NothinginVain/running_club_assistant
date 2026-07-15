@@ -1,7 +1,11 @@
 import requests
 import json
+import os
+from dotenv import load_dotenv
 
-BASE_URL = 'http://127.0.0.1:5002'
+load_dotenv()
+
+BASE_URL = os.getenv('BASE_URL')
 
 def build_sample_survey():
     simple_survey = {
