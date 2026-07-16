@@ -70,16 +70,16 @@ def build_sample_survey():
     survey_v2 = {
         "survey_type": "running_plan",
         "answers": {
-            "goal": "general_fitness",
-            "plan_duration_weeks": 4,
+            "goal": "half-marathon",
+            "plan_duration_weeks": 8,
 
-            "experience_level": "intermediate",
-            "current_weekly_distance_km": 8,
+            "experience_level": "beginner",
+            "current_weekly_distance_km": 5,
             "runs_per_week": 3,
             "preferred_training_days": ["Tuesday","Thursday", "Saturday"],
-            "longest_recent_run_km": 10,
+            "longest_recent_run_km": 5,
 
-            "preferred_terrain": "mix",
+            "preferred_terrain": "road",
             "available_equipment": ["none"],
 
             "has_current_issue": False,
@@ -88,7 +88,7 @@ def build_sample_survey():
             "diet_type": "omnivore",
             "dietary_restrictions": [],
 
-            "main_preference": "simple plan that builds consistency",
+            "main_preference": "taking care of my body",
             "recommendation_detail_level": "balanced"
         }
     }

@@ -16,7 +16,7 @@ BASE_URL = os.getenv('BASE_URL')
 def build_feedback_payload():
     return {
         'feedback_rating': 4 ,
-        'feedback_comment': 'i am injury free now feeling pretty goof after the weeks plan, can i increase the distance? and push little more ? maybe add one more day to my running plan, ',
+        'feedback_comment': 'will like to have the strength plan and mobility in the days that i am running, want to know if i do them after or before running ',
     }
 
 
@@ -43,6 +43,7 @@ def build_feedback_recommendation_package(previus_recommendation, new_recommenda
         'content': new_recommendation['content'],
         'explanation': new_recommendation.get('explanation'),
     }
+
 
 @observe(name='feedback_recommendation_execution')
 def execute_feedback_recommendation(recommendation_id, prompt_version='simple'):

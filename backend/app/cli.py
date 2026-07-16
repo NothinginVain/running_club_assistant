@@ -1,3 +1,4 @@
+import json
 from app.services.recommendation_manager import execute_recommendation, update_favorite_recommendation
 from app.services.survey_manager import (
     save_survey,
@@ -12,15 +13,16 @@ def show_menu():
         """
 0 - Exit
 1 - Create running plan
+2 - Recommendations view  
 3 - Feedback / Generate new running plan
-4 - Recommendations view 
 5 - add Favorite Recommendations 
+
 """
     )
 
 
 def run_cli():
-    user_id = "328cae0c-b9fe-4d3e-ac20-7fc642b406e1"
+    user_id = "e1347682-fb4c-4e2b-a030-3cf0d3c0ae1e"
     recommendation_id = "efc1e79d-d4b1-4513-b795-3dd07498f3b0"
 
     while True:
@@ -41,14 +43,19 @@ def run_cli():
             payload = build_survey_package(survey)
             save_survey(user_id, payload)
             print("Survey saved.")
+            print("Executing recommendation...")
+            result = execute_recommendation(user_id)
+            print("Recommendation executed.")
+            print(json.dumps(result, indent=4, ensure_ascii=False))
 
         elif user_input == 2:
-            execute_recommendation(user_id)
-            print("Recommendation executed.")
+            pass
 
         elif user_input == 3:
-            execute_feedback_recommendation(recommendation_id)
+            print("Executing feedback recommendation ...")
+            result = execute_feedback_recommendation(recommendation_id)
             print("Feedback executed.")
+            print(json.dumps(result, indent=4))
 
         elif user_input == 5:
            favorite_input = input('Set favorite? true/false:').strip().lower()
