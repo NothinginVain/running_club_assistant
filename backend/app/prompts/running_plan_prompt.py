@@ -228,7 +228,7 @@ Return JSON in exactly this structure:
 The survey JSON will be provided as the input.
  '''
 
-def get_running_plan_prompt(version: str = "simple2") -> str:
+def get_running_plan_prompt(version: str = "simple") -> str:
     prompts = {
         "simple": SIMPLE_RUNNING_PLAN_PROMPT,
         "simple2": SIMPLE_RUNNING_PLAN_PROMPT_V2,

@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 from typing import Literal
 
 
-SupportTiming = Literal["before_run", "after_run", "separate","rest_day"]
+SupportTiming = Literal["before_run", "after_run", "separate", "rest_day"]
 
 class RunningBlock(BaseModel):
     type: str
@@ -19,16 +19,17 @@ class SupportBlock(BaseModel):
 
 
 class TrainingDay(BaseModel):
-    week_number: int = Field(get=1)
+    week_number: int = Field(ge=1)
+    day: str
     running: RunningBlock | None = None
-    support: SupportBlock | None = None
-    mobility: RunningBlock | None = None
-    notes: str
+    strength: SupportBlock | None = None
+    mobility: SupportBlock | None = None
+    notes: str | None = None
 
 
-class WeeklyDistance(BaseModel):
-    week_number: int = Field(get=1)
-    distance_km: float
+# class WeeklyDistance(BaseModel):
+#     week_number: int = Field(get=1)
+#     distance_km: float
 
 
 class PlanContent(BaseModel):
