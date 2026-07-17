@@ -1,25 +1,29 @@
 from pydantic import BaseModel, Field
+from typing import Literal
 
 
-class RunningSession(BaseModel):
-    week_number: int = Field(get=1)
-    day: str
+SupportTiming = Literal["before_run", "after_run", "separate","rest_day"]
+
+class RunningBlock(BaseModel):
     type: str
     distance_km: float
-    intensity: str
+    intensity_level: str
     details: str
 
 
-class StrengthSession(BaseModel):
-    day: str
+class SupportBlock(BaseModel):
     focus: str
+    timing: SupportTiming
+    duration_minutes: int
     details: str
 
 
-class MobilitySession(BaseModel):
-    day: str
-    focus: str
-    details: str
+class TrainingDay(BaseModel):
+    week_number: int = Field(get=1)
+    running: RunningBlock | None = None
+    support: SupportBlock | None = None
+    mobility: RunningBlock | None = None
+    notes: str
 
 
 class WeeklyDistance(BaseModel):
@@ -29,12 +33,9 @@ class WeeklyDistance(BaseModel):
 
 class PlanContent(BaseModel):
     summary: str
-    sessions: list[RunningSession]
-    strength: list[StrengthSession]
-    mobility: list[MobilitySession]
+    training_days: list[TrainingDay]
     nutrition: list[str]
     safety_notes: list[str]
-    # weekly_distance_km: list[WeeklyDistance]
 
 
 class PlanExplanation(BaseModel):
