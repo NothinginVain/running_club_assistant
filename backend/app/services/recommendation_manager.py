@@ -66,6 +66,39 @@ def save_recommendation(payload):
     return response.json()
 
 
+def get_recommendations_by_user(user_id):
+    response = requests.get(f'{BASE_URL}/recommendations/user/{user_id}')
+
+    if not response.ok:
+        print("Recommendation API error:")
+        print(response.text)
+
+    response.raise_for_status()
+    return response.json()
+
+
+def get_recommendation_by_id(recommendation_id):
+    response = requests.get(f'{BASE_URL}/recommendations/{recommendation_id}')
+
+    if not response.ok:
+        print("Recommendation API error:")
+        print(response.text)
+
+    response.raise_for_status()
+    return response.json()
+
+
+def get_favorite_recommendations_by_user(user_id):
+    response = requests.get(f'{BASE_URL}/recommendations/user/{user_id}/favorites')
+
+    if not response.ok:
+        print("Recommendation API error:")
+        print(response.text)
+
+    response.raise_for_status()
+    return response.json()
+
+
 def update_favorite_recommendation(recommendation_id, favorite):
     payload = {
        'is_favorite': favorite,
