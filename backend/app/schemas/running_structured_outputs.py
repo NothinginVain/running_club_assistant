@@ -27,13 +27,14 @@ class TrainingDay(BaseModel):
     notes: str | None = None
 
 
-# class WeeklyDistance(BaseModel):
-#     week_number: int = Field(get=1)
-#     distance_km: float
+class WeeklyDistance(BaseModel):
+    week_number: int = Field(ge=1)
+    distance_km: float
 
 
 class PlanContent(BaseModel):
     summary: str
+    weekly_distance: list[WeeklyDistance]
     training_days: list[TrainingDay]
     nutrition: list[str]
     safety_notes: list[str]

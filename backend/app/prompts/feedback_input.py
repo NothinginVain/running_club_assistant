@@ -8,21 +8,57 @@ def build_feedback_input(previous_recommendation: dict) -> str:
         or []
     )
 
-    sessions = content.get("sessions", [])
-
-    session_text = "\n".join(
-        (
-            f"- {session.get('day')}: "
-            f"{session.get('type')} — "
-            f"{session.get('distance_km')} km, "
-            f"{session.get('intensity')}. "
-            f"{session.get('details')}"
-        )
-        for session in sessions
+    weekly_distance_text = "\n".join(
+        f"- Week {week.get('week_number')}: {week.get('distance_km')} km"
+        for week in content.get("weekly_distance", [])
     )
 
-    if not session_text:
-        session_text = "No previous sessions available."
+    if not weekly_distance_text:
+        weekly_distance_text = "No previous weekly distance available."
+
+    training_days_lines = []
+
+    for training_day in content.get("training_days", []):
+        training_days_lines.append(
+            f"- Week {training_day.get('week_number')}, {training_day.get('day')}"
+        )
+
+        running = training_day.get("running")
+        if running:
+            training_days_lines.append(
+                f"  Running: {running.get('type')}, "
+                f"{running.get('distance_km')} km, "
+                f"{running.get('intensity_level')}. "
+                f"{running.get('details')}"
+            )
+
+        strength = training_day.get("strength")
+        if strength:
+            training_days_lines.append(
+                f"  Strength: {strength.get('focus')}, "
+                f"{strength.get('timing')}, "
+                f"{strength.get('duration_minutes')} min. "
+                f"{strength.get('details')}"
+            )
+
+        mobility = training_day.get("mobility")
+        if mobility:
+            training_days_lines.append(
+                f"  Mobility: {mobility.get('focus')}, "
+                f"{mobility.get('timing')}, "
+                f"{mobility.get('duration_minutes')} min. "
+                f"{mobility.get('details')}"
+            )
+
+        if training_day.get("notes"):
+            training_days_lines.append(
+                f"  Notes: {training_day.get('notes')}"
+            )
+
+    training_days_text = "\n".join(training_days_lines)
+
+    if not training_days_text:
+        training_days_text = "No previous training days available."
 
     return f"""
     Revise the runner's previous running plan.
@@ -51,10 +87,12 @@ def build_feedback_input(previous_recommendation: dict) -> str:
 
     Title: {previous_recommendation.get("title")}
     Summary: {content.get("summary")}
-    Weekly distance: {content.get("weekly_distance_km")} km
 
-    Previous sessions:
-    {session_text}
+    Previous weekly distance:
+    {weekly_distance_text}
+
+    Previous training days:
+    {training_days_text}
 
     RUNNER FEEDBACK
 
@@ -65,4 +103,8 @@ def build_feedback_input(previous_recommendation: dict) -> str:
 
     Keep the original goal and useful parts of the previous plan, but apply
     the runner's feedback directly to the new recommendation.
+    Respect the preferred training days: {", ".join(preferred_days)}.
+    Do not create training days outside those preferred days.
+    Keep running, strength, and mobility grouped by week and day.
+    Keep weekly distance progression conservative.
     """.strip()
