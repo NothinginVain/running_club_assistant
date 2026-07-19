@@ -72,7 +72,7 @@ def build_sample_survey():
         "answers": {
             "goal": "half-marathon",
             "plan_duration_weeks": 8,
-
+            "plan_start_date": "2026-09-20",
             "experience_level": "beginner",
             "current_weekly_distance_km": 5,
             "runs_per_week": 3,

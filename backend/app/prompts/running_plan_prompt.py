@@ -80,12 +80,23 @@ SIMPLE_RUNNING_PLAN_PROMPT_V2 =  SIMPLE_RUNNING_PLAN_PROMPT = '''
   - Use "rest_day" only if the day has no running.
   - Do not use "before_run" for strength unless it is a very light activation routine.
 
-  Date rules:
+Date rules:
 
-  - If a plan_start_date is provided in the survey, use it as the start of the plan.
-  - If no plan_start_date is provided, treat the survey creation date as the plan start date if available.
-  - If no date is available, still create the plan using week_number and day.
-  - If real dates are available in the schema, ensure each training day date matches its weekday.
+  - Use the plan_start_date from the survey as the first date of the plan.
+  - Week 1 starts on the plan_start_date.
+  - Each weekly_distance item must include:
+    - week_number
+    - start_date in YYYY-MM-DD format
+    - end_date in YYYY-MM-DD format
+    - distance_km
+  - Each training_days item must include:
+    - week_number
+    - date in YYYY-MM-DD format
+    - day matching that date
+  - Training day dates must be real calendar dates calculated from the plan_start_date.
+  - The day field must match the actual weekday of the date.
+  - Use only the runner's preferred training days.
+  - Do not create training days outside the preferred training days.
 
   Nutrition and safety rules:
 
@@ -97,8 +108,9 @@ SIMPLE_RUNNING_PLAN_PROMPT_V2 =  SIMPLE_RUNNING_PLAN_PROMPT = '''
   Schema guidance:
 
   - The plan content must use weekly_distance and training_days.
+  - Each weekly_distance item must include week_number, start_date, end_date, and distance_km.
+  - Each training day must include week_number, date, and day.
   - Do not use old separate fields like sessions, strength list, mobility list, or weekly_distance_km.
-  - Each training day must include week_number and day.
   - Running blocks use type, distance_km, intensity_level, and details.
   - Strength and mobility blocks use focus, timing, duration_minutes, and details.
   - Explain why the plan fits in why_this_plan_fits.

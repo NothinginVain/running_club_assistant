@@ -5,6 +5,11 @@ def build_running_plan_input(user, survey):
         answers.get("preferred_training_days", [])
     )
 
+    plan_start_date = (
+        answers.get("plan_start_date")
+        or str(survey.get('created_at', ''))[:10]
+    )
+
     equipment = ", ".join(
         answers.get("available_equipment", [])
     )
@@ -37,6 +42,7 @@ def build_running_plan_input(user, survey):
     Main goal: {answers.get("goal")}
     Experience level: {answers.get("experience_level")}
     Plan duration: {answers.get("plan_duration_weeks")} weeks
+    Plan start date: {plan_start_date}
 
     Current weekly distance: {answers.get("current_weekly_distance_km")} km
     Runs per week: {answers.get("runs_per_week")}

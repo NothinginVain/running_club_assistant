@@ -20,6 +20,7 @@ class SupportBlock(BaseModel):
 
 class TrainingDay(BaseModel):
     week_number: int = Field(ge=1)
+    date: str
     day: str
     running: RunningBlock | None = None
     strength: SupportBlock | None = None
@@ -29,6 +30,8 @@ class TrainingDay(BaseModel):
 
 class WeeklyDistance(BaseModel):
     week_number: int = Field(ge=1)
+    start_date: str
+    end_date: str
     distance_km: float
 
 
