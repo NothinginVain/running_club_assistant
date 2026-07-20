@@ -46,8 +46,7 @@ def build_feedback_recommendation_package(previus_recommendation, new_recommenda
 
 
 @observe(name='feedback_recommendation_execution')
-def execute_feedback_recommendation(recommendation_id, prompt_version='simple'):
-    user_feedback = build_feedback_payload()
+def execute_feedback_recommendation(recommendation_id, user_feedback, prompt_version='simple'):
     saved_feedback_recommendation = save_feedback(recommendation_id,user_feedback)
     new_recommendation = generate_feedback_recommendation(saved_feedback_recommendation, prompt_version)
     payload = build_feedback_recommendation_package(saved_feedback_recommendation, new_recommendation)
@@ -58,6 +57,7 @@ def execute_feedback_recommendation(recommendation_id, prompt_version='simple'):
 if __name__ == '__main__':
     test_recommendation_id = '6a54a5eb-f27c-4a72-b384-fa2eed9b64c4'
 
-    result = execute_feedback_recommendation(test_recommendation_id)
+    test_feedback_payload = build_feedback_payload()
+    result = execute_feedback_recommendation(test_recommendation_id, test_feedback_payload)
 
     print(json.dumps(result, indent=4))
