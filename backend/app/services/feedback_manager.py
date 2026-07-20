@@ -46,7 +46,7 @@ def build_feedback_recommendation_package(previus_recommendation, new_recommenda
 
 
 @observe(name='feedback_recommendation_execution')
-def execute_feedback_recommendation(recommendation_id, user_feedback, prompt_version='simple'):
+def execute_feedback_recommendation(recommendation_id, user_feedback, prompt_version='simple2'):
     saved_feedback_recommendation = save_feedback(recommendation_id,user_feedback)
     new_recommendation = generate_feedback_recommendation(saved_feedback_recommendation, prompt_version)
     payload = build_feedback_recommendation_package(saved_feedback_recommendation, new_recommendation)

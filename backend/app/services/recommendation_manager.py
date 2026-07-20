@@ -128,7 +128,7 @@ def delete_recommendation(recommendation_id):
     return None
 
 @observe(name='recommendation_execution')
-def execute_recommendation(user_id, prompt_version='simple'):
+def execute_recommendation(user_id, prompt_version='medium3'):
     survey = get_latest_survey(user_id)
     user = get_user(user_id)
     recommendation = generate_recommendation(user, survey, prompt_version)

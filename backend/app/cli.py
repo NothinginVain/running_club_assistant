@@ -19,7 +19,7 @@ from app.services.survey_manager import (
 
 load_dotenv()
 
-DEFAULT_USER_ID = "e1347682-fb4c-4e2b-a030-3cf0d3c0ae1e"
+DEFAULT_USER_ID = "328cae0c-b9fe-4d3e-ac20-7fc642b406e1"
 
 
 def clear_space():
