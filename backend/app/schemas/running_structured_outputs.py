@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Literal
+from typing import Any, Literal
 
 
 SupportTiming = Literal["before_run", "after_run", "separate", "rest_day"]
@@ -52,3 +52,11 @@ class RunningPlanOutput(BaseModel):
     title: str
     content: PlanContent
     explanation: PlanExplanation
+
+
+class CoachMemorySummary(BaseModel):
+    current_goal: str | None = None
+    preferences: dict[str, Any] = Field(default_factory=dict)
+    progress: str | None = None
+    plans: list[str] = Field(default_factory=list)
+    feedback_highlights: list[str] = Field(default_factory=list)
