@@ -1,5 +1,6 @@
 import os
 
+import requests
 from dotenv import load_dotenv
 
 from app.services.feedback_manager import execute_feedback_recommendation
@@ -96,6 +97,7 @@ def show_dashboard():
     print("1 - Create running plan")
     print("2 - View all recommendations")
     print("3 - View favorite recommendations")
+    print("4 - Chat with coach")
     print("0 - Exit")
 
 
@@ -163,6 +165,51 @@ def browse_recommendations_flow(favorites_only=False):
 
         if should_return_dashboard:
             return
+
+
+def chat_with_coach_flow():
+    title("Chat with Coach")
+    base_url = os.getenv("BASE_URL")
+
+    print("Type your message, 'END' to finish and save memory, or 'B' to go back without saving.")
+
+    while True:
+        message = input("\nYou: ").strip()
+
+        if message.lower() == "b":
+            return
+
+        if message.lower() == "end":
+            response = requests.post(f"{base_url}/chatbot/{DEFAULT_USER_ID}/end")
+
+            if not response.ok:
+                print("Chatbot API error:", response.text)
+                input("Press Enter to continue...")
+                return
+
+            summary = response.json().get("summary", {})
+            print("\nMemory updated:")
+            print(f"  Current goal: {summary.get('current_goal')}")
+            print(f"  Preferences: {summary.get('preferences')}")
+            print(f"  Progress: {summary.get('progress')}")
+            print(f"  Plans: {summary.get('plans')}")
+            print(f"  Feedback highlights: {summary.get('feedback_highlights')}")
+            input("\nPress Enter to return to dashboard...")
+            return
+
+        if not message:
+            continue
+
+        response = requests.post(
+            f"{base_url}/chatbot/{DEFAULT_USER_ID}",
+            json={"message": message},
+        )
+
+        if not response.ok:
+            print("Chatbot API error:", response.text)
+            continue
+
+        print(f"Coach: {response.json().get('reply')}")
 
 
 def show_recommendation_list(recommendations):
@@ -442,6 +489,8 @@ def run_cli():
                 browse_recommendations_flow(favorites_only=False)
             elif choice == "3":
                 browse_recommendations_flow(favorites_only=True)
+            elif choice == "4":
+                chat_with_coach_flow()
             else:
                 print("Invalid option.")
                 input("Press Enter to continue...")

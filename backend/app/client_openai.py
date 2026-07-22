@@ -2,7 +2,7 @@ import json
 from typing import Any
 from dotenv import load_dotenv
 from langfuse.openai import OpenAI
-from app.schemas.running_structured_outputs import RunningPlanOutput
+from app.schemas.running_structured_outputs import RunningPlanOutput, ChatReplyOutput, CoachMemorySummary
 
 load_dotenv()
 
@@ -30,6 +30,53 @@ def get_recommendation(input_text: str, instructions: str, prompt_version: str) 
         )
 
     return structured_output.model_dump()
+
+
+def get_chat_reply(input_text: str, instructions: str, prompt_version: str) -> dict[str, Any]:
+    response = client.responses.parse(
+        model="gpt-4o-mini",
+        instructions=instructions,
+        input=input_text,
+        text_format=ChatReplyOutput,
+        metadata={
+            "feature": "chatbot",
+            "environment": "local_backend",
+            "prompt_version": prompt_version,
+        },
+    )
+
+    structured_output = response.output_parsed
+
+    if structured_output is None:
+        raise ValueError(
+            "OpenAI returned no structured chat reply output."
+        )
+
+    return structured_output.model_dump()
+
+
+def summarize_conversation(input_text: str, instructions: str, prompt_version: str) -> dict[str, Any]:
+    response = client.responses.parse(
+        model="gpt-4o-mini",
+        instructions=instructions,
+        input=input_text,
+        text_format=CoachMemorySummary,
+        metadata={
+            "feature": "coach_memory_summary",
+            "environment": "local_backend",
+            "prompt_version": prompt_version,
+        },
+    )
+
+    structured_output = response.output_parsed
+
+    if structured_output is None:
+        raise ValueError(
+            "OpenAI returned no structured coach memory summary output."
+        )
+
+    return structured_output.model_dump()
+
 
 
 # if __name__ == "__main__":

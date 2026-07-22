@@ -55,7 +55,10 @@
 #     main()
 
 from fastapi import FastAPI
-from app.api.routes import users, surveys, recommendations
+from app.api.routes import users, surveys, recommendations, chatbot
+
+
+
 
 app = FastAPI(title="Running AI App")
 
@@ -66,5 +69,6 @@ def read_root():
 app.include_router(users.router)
 app.include_router(surveys.router)
 app.include_router(recommendations.router)
+app.include_router(chatbot.router)
 
 # uvicorn app.main:app --reload --port 5002
