@@ -18,6 +18,7 @@ class RecommendationCreate(BaseModel):
 class RecommendationRead(BaseModel):
     id: UUID
     survey_id: UUID
+    user_id: UUID
     recommendation_type: RecommendationType
 
     title: str

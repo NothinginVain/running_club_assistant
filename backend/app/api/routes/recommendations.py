@@ -37,6 +37,7 @@ def create_recommendation(
 
     recommendation = Recommendation(
         survey_id=recommendation_data.survey_id,
+        user_id=survey.user_id,
         recommendation_type=recommendation_data.recommendation_type,
         title=recommendation_data.title,
         content=recommendation_data.content,
