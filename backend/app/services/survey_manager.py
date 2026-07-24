@@ -70,14 +70,14 @@ def build_sample_survey():
     survey_v2 = {
         "survey_type": "running_plan",
         "answers": {
-            "goal": "half-marathon",
-            "plan_duration_weeks": 4,
-            "plan_start_date": "2026-07-19",
-            "experience_level": "Intermediate",
-            "current_weekly_distance_km": 35,
-            "runs_per_week": 3,
-            "preferred_training_days": ["Tuesday","Thursday", "Saturday"],
-            "longest_recent_run_km": 15,
+            "goal": "health-care-focused",
+            "plan_duration_weeks": 6,
+            "plan_start_date": "2026-08-01",
+            "experience_level": "Beginner to Intermediate",
+            "current_weekly_distance_km": None,
+            "runs_per_week": 2,
+            "preferred_training_days": ["Wednesday", "Saturday"],
+            "longest_recent_run_km": 8,
 
             "preferred_terrain": "mix",
             "available_equipment": ["none"],
@@ -85,10 +85,10 @@ def build_sample_survey():
             "has_current_issue": False,
             "pain_during_running_level_0_to_10": 0,
 
-            "diet_type": "vegetarian",
+            "diet_type": "omnivore",
             "dietary_restrictions": [],
 
-            "main_preference": "taking care of my mind and body",
+            "main_preference": "progressive plan",
             "recommendation_detail_level": "balanced"
         }
     }

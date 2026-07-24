@@ -20,7 +20,7 @@ from app.services.survey_manager import (
 
 load_dotenv()
 
-DEFAULT_USER_ID = "328cae0c-b9fe-4d3e-ac20-7fc642b406e1"
+DEFAULT_USER_ID = "fa02c75e-0d37-4954-86e9-dd65484cebc0"
 
 
 def clear_space():
@@ -171,7 +171,7 @@ def chat_with_coach_flow():
     title("Chat with Coach")
     base_url = os.getenv("BASE_URL")
 
-    print("Type your message, 'END' to finish and save memory, or 'B' to go back without saving.")
+    print("Type your message, 'END' to finish and update long-term memory, or 'B' to pause and return to the dashboard (this conversation is kept and resumes next time).")
 
     while True:
         message = input("\nYou: ").strip()
