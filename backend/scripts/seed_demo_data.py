@@ -14,7 +14,7 @@ from app.models.knowledge_base import KnowledgeBase
 from app.models.user import User
 
 DEMO_USER_ID = uuid.UUID("328cae0c-b9fe-4d3e-ac20-7fc642b406e1")
-KNOWLEDGE_DOCS_DIR = Path("/Users/j-miguelrocharamos/Documents/running_app_assistant")
+KNOWLEDGE_DOCS_DIR = BACKEND_DIR / "knowledge_docs"
 
 
 def parse_markdown_file(path: Path) -> dict:
@@ -75,16 +75,16 @@ def seed_knowledge_base(db) -> None:
         print(f"No markdown files found in {KNOWLEDGE_DOCS_DIR}")
         return
 
+    seen_titles = set(db.scalars(select(KnowledgeBase.title)).all())
+
     for path in markdown_files:
         parsed = parse_markdown_file(path)
 
-        existing = db.scalars(
-            select(KnowledgeBase).where(KnowledgeBase.title == parsed["title"])
-        ).first()
-        if existing:
+        if parsed["title"] in seen_titles:
             print(f"Knowledge doc already exists: {parsed['title']}")
             continue
 
+        seen_titles.add(parsed["title"])
         db.add(KnowledgeBase(**parsed))
         print(f"Added knowledge doc: {parsed['title']}")
 
