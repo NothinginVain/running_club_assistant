@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.services.coach_memory_manager import get_or_create_coach_memory
 from app.client_openai import get_chat_reply, summarize_conversation
 from app.db.session import get_db
-from app.models.coach_memory import CoachMemory
 from app.models.knowledge_base import KnowledgeBase
 from app.models.user import User
 from app.prompts.chatbot_input import build_chatbot_input, build_conversation_summary_input
@@ -15,23 +15,6 @@ from app.schemas.chatbot import ChatbotEndResponse, ChatbotRequest, ChatbotRespo
 from app.schemas.running_structured_outputs import CoachMemorySummary
 
 router = APIRouter(prefix='/chatbot', tags=['Chatbot'])
-
-
-def _get_or_create_coach_memory(db: Session, user_id: UUID) -> CoachMemory:
-    coach_memory = db.scalars(
-        select(CoachMemory).where(CoachMemory.user_id == user_id)
-    ).first()
-
-    if not coach_memory:
-        coach_memory = CoachMemory(
-            user_id=user_id,
-            summary=CoachMemorySummary().model_dump(),
-        )
-        db.add(coach_memory)
-        db.commit()
-        db.refresh(coach_memory)
-
-    return coach_memory
 
 
 def _user_profile(user: User) -> dict:
@@ -56,8 +39,12 @@ def chat_with_coach(
             detail='User not found',
         )
 
-    coach_memory = _get_or_create_coach_memory(db, user_id)
-    conversation_history = coach_memory.summary.get("current_conversation", [])
+    coach_memory = get_or_create_coach_memory(db, user_id)
+    chat_memory = coach_memory.summary.get("chat", {})
+    conversation_history = chat_memory.get(
+        "current_conversation",
+        [],
+    )
 
     knowledge_documents = db.scalars(select(KnowledgeBase)).all()
 
@@ -86,7 +73,10 @@ def chat_with_coach(
 
     coach_memory.summary = {
         **coach_memory.summary,
-        "current_conversation": updated_conversation,
+        "chat": {
+            **chat_memory,
+            "current_conversation": updated_conversation,
+        },
     }
 
     db.commit()
@@ -108,16 +98,20 @@ def end_chat(
             detail='User not found',
         )
 
-    coach_memory = _get_or_create_coach_memory(db, user_id)
-    conversation_history = coach_memory.summary.get("current_conversation", [])
+    coach_memory = get_or_create_coach_memory(db, user_id)
+    chat_memory = coach_memory.summary.get("chat", {})
+    conversation_history = chat_memory.get(
+        "current_conversation",
+        [],
+    )
 
     if not conversation_history:
-        current_summary = {
-            key: value
-            for key, value in coach_memory.summary.items()
-            if key != "current_conversation"
-        }
-        return ChatbotEndResponse(summary=CoachMemorySummary(**current_summary))
+        db.commit()
+        db.refresh(coach_memory)
+
+        return ChatbotEndResponse(
+            summary=CoachMemorySummary(**coach_memory.summary)
+        )
 
     instructions = get_memory_summary_prompt()
     input_text = build_conversation_summary_input(
@@ -126,11 +120,23 @@ def end_chat(
         conversation_history,
     )
 
-    updated_summary = summarize_conversation(input_text, instructions, "simple")
+    updated_chat_summary = summarize_conversation(
+        input_text,
+        instructions,
+        "simple",
+    )
 
-    coach_memory.summary = updated_summary
+    coach_memory.summary = {
+        **coach_memory.summary,
+        "chat": {
+            **updated_chat_summary,
+            "current_conversation": [],
+        },
+    }
 
     db.commit()
     db.refresh(coach_memory)
 
-    return ChatbotEndResponse(summary=CoachMemorySummary(**updated_summary))
+    return ChatbotEndResponse(
+        summary=CoachMemorySummary(**coach_memory.summary)
+    )

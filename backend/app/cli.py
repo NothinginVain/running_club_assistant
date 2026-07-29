@@ -20,7 +20,7 @@ from app.services.survey_manager import (
 
 load_dotenv()
 
-DEFAULT_USER_ID = "fa02c75e-0d37-4954-86e9-dd65484cebc0"
+DEFAULT_USER_ID = "4863d7f9-fa86-43ce-80f2-e8b97d208269"
 
 
 def clear_space():
@@ -188,12 +188,16 @@ def chat_with_coach_flow():
                 return
 
             summary = response.json().get("summary", {})
+            chat_memory = summary.get("chat", {})
+            recommendations = summary.get("recommendations", [])
+            feedback = summary.get("feedback", [])
+
             print("\nMemory updated:")
-            print(f"  Current goal: {summary.get('current_goal')}")
-            print(f"  Preferences: {summary.get('preferences')}")
-            print(f"  Progress: {summary.get('progress')}")
-            print(f"  Plans: {summary.get('plans')}")
-            print(f"  Feedback highlights: {summary.get('feedback_highlights')}")
+            print(f"  Current goal: {chat_memory.get('current_goal')}")
+            print(f"  Preferences: {chat_memory.get('preferences')}")
+            print(f"  Progress: {chat_memory.get('progress')}")
+            print(f"  Recommendations stored: {len(recommendations)}")
+            print(f"  Feedback entries stored: {len(feedback)}")
             input("\nPress Enter to return to dashboard...")
             return
 

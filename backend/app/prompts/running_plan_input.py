@@ -34,8 +34,8 @@ def build_running_plan_input(user, survey):
     Name: {user.get("full_name")}
     Age: {user.get("age")}
     Location: {user.get("address")}
-    Height: {user.get("height_cm")} cm
-    Weight: {user.get("weight_kg")} kg
+    Height: {answers.get("Height")} cm
+    Weight: {answers.get("Weight")} kg
 
     RUNNING SURVEY
 

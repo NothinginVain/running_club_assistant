@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.services.coach_memory_manager import update_memory_after_recommendation, update_memory_after_feedback
 from app.db.session import get_db
 from app.models.user import User
 from app.models.recommendation import Recommendation
@@ -29,7 +30,7 @@ def create_recommendation(
 ):
     survey = db.get(Survey, recommendation_data.survey_id)
 
-    if not survey:
+    if survey is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail='Survey not found',
@@ -46,6 +47,13 @@ def create_recommendation(
     )
 
     db.add(recommendation)
+    db.flush()
+
+    update_memory_after_recommendation(
+        db,
+        recommendation,
+    )
+
     db.commit()
     db.refresh(recommendation)
 
@@ -138,7 +146,7 @@ def update_recommendation_feedback(
 ):
     recommendation = db.get(Recommendation, recommendation_id)
 
-    if not recommendation:
+    if recommendation is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail='Recommendation not found',
@@ -146,6 +154,13 @@ def update_recommendation_feedback(
 
     recommendation.feedback_rating = feedback_data.feedback_rating
     recommendation.feedback_comment = feedback_data.feedback_comment
+
+    db.flush()
+
+    update_memory_after_feedback(
+        db,
+        recommendation,
+    )
 
     db.commit()
     db.refresh(recommendation)

@@ -2,7 +2,7 @@ import json
 from typing import Any
 from dotenv import load_dotenv
 from langfuse.openai import OpenAI
-from app.schemas.running_structured_outputs import RunningPlanOutput, ChatReplyOutput, CoachMemorySummary
+from app.schemas.running_structured_outputs import RunningPlanOutput, ChatReplyOutput, ChatSummaryOutput
 
 load_dotenv()
 
@@ -60,7 +60,7 @@ def summarize_conversation(input_text: str, instructions: str, prompt_version: s
         model="gpt-4o-mini",
         instructions=instructions,
         input=input_text,
-        text_format=CoachMemorySummary,
+        text_format=ChatSummaryOutput,
         metadata={
             "feature": "coach_memory_summary",
             "environment": "local_backend",
@@ -72,7 +72,7 @@ def summarize_conversation(input_text: str, instructions: str, prompt_version: s
 
     if structured_output is None:
         raise ValueError(
-            "OpenAI returned no structured coach memory summary output."
+            "OpenAI returned no structured chat summary output."
         )
 
     return structured_output.model_dump()

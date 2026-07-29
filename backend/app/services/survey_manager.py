@@ -70,15 +70,16 @@ def build_sample_survey():
     survey_v2 = {
         "survey_type": "running_plan",
         "answers": {
-            "goal": "health-care-focused",
-            "plan_duration_weeks": 6,
+            "goal": "loosing weight",
+            "plan_duration_weeks": 4,
             "plan_start_date": "2026-08-01",
             "experience_level": "Beginner to Intermediate",
             "current_weekly_distance_km": None,
             "runs_per_week": 2,
             "preferred_training_days": ["Wednesday", "Saturday"],
-            "longest_recent_run_km": 8,
-
+            "longest_recent_run_km": 1,
+            "Weight": 130,
+            "Height": 178,
             "preferred_terrain": "mix",
             "available_equipment": ["none"],
 
