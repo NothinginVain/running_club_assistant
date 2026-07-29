@@ -64,4 +64,5 @@ print()
 print('Headings found:')
 
 for block in blocks:
-    if block.
+    if block.startswith('#'):
+        print(block)
