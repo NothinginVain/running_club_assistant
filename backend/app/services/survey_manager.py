@@ -70,16 +70,16 @@ def build_sample_survey():
     survey_v2 = {
         "survey_type": "running_plan",
         "answers": {
-            "goal": "loosing weight",
-            "plan_duration_weeks": 4,
+            "goal": "wish to run 5k",
+            "plan_duration_weeks": 6,
             "plan_start_date": "2026-08-01",
-            "experience_level": "Beginner to Intermediate",
+            "target_event_date": None,
+            "experience_level": "Beginner",
             "current_weekly_distance_km": None,
             "runs_per_week": 2,
             "preferred_training_days": ["Wednesday", "Saturday"],
             "longest_recent_run_km": 1,
-            "Weight": 130,
-            "Height": 178,
+            "Weight": 55,
             "preferred_terrain": "mix",
             "available_equipment": ["none"],
 
@@ -93,7 +93,109 @@ def build_sample_survey():
             "recommendation_detail_level": "balanced"
         }
     }
-    return survey_v2
+
+    survey_v3 = {
+  "survey_type": "running_plan",
+  "answers": {
+    "goal": {
+      "main_goal": "run_10k",
+      "plan_start_date": "2026-08-01",
+      "target_event_date": "2026-10-18",
+      "plan_duration_weeks": 8
+    },
+
+    "current_training": {
+      "experience_level": "beginner",
+      "current_runs_per_week": 3,
+      "current_weekly_distance_km": 15,
+      "longest_recent_run_km": 7,
+    },
+
+    "availability": {
+      "runs_per_week": 2,
+      "preferred_training_days": [
+        "Tuesday",
+        "Thursday",
+        "Sunday"
+      ],
+    },
+
+    "health": {
+      "has_current_issue": False,
+      "current_issue_description": None,
+      "pain_during_running_level_0_to_10": 0,
+    },
+
+    "training_preferences": {
+      "preferred_terrain": "road",
+      "available_equipment": [
+        "resistance_band",
+        "gym"
+      ],
+      "preferred_intensity": "balanced"
+    },
+
+    "recovery": {
+      "sleep_quality": "good",
+      "daily_stress_level": "moderate",
+      "recovery_after_runs": "good",
+      "current_energy_level": "good"
+    },
+
+    "measurements": {
+      "weight_kg": 70
+    },
+
+    "nutrition": {
+      "diet_type": "vegetarian",
+      "dietary_restrictions": [],
+    },
+
+    "output_preferences": {
+      "recommendation_detail_level": "balanced",
+      "main_preference": "stability"
+    }
+  }
+}
+    final_survey = {
+  "answers": {
+    "goal": "build_endurance",
+    "target_distance": "10k",
+    "plan_duration_weeks": 8,
+    "plan_start_date": "2026-08-03",
+    "target_event_date": "2026-10-04",
+    "experience_level": "intermediate",
+    "current_weekly_distance_km": 30,
+    "runs_per_week": 4,
+    "longest_recent_run_km": 10,
+    "preferred_training_days": [
+      "tuesday",
+      "thursday",
+      "saturday",
+      "sunday"
+    ],
+    "preferred_long_run_day": "sunday",
+    "max_session_minutes": 90,
+    "preferred_terrain": "road",
+    "available_equipment": [
+      "none"
+    ],
+    "current_issue_areas": [
+      "none"
+    ],
+    "current_pain_level": 0,
+    "has_medical_clearance": None,
+    "recovery_level": "good",
+    "average_sleep_duration": "7_to_8_hours",
+    "stress_level": "moderate",
+    "diet_type": "omnivore",
+    "weight_kg": 72,
+    "main_preference": "balanced_training",
+    "detail_level": "balanced"
+  }
+}
+
+    return final_survey
 
 def build_survey_package(survey: dict):
     return {

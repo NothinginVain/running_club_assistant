@@ -8,6 +8,26 @@ def build_feedback_input(previous_recommendation: dict) -> str:
         or []
     )
 
+    issue_areas = survey.get("current_issue_areas")
+    if issue_areas:
+        issue_areas_text = ", ".join(issue_areas)
+    else:
+        issue_areas_text = (
+            survey.get("has_current_issue")
+            or survey.get("current_injury")
+            or "None"
+        )
+
+    pain_level = survey.get("current_pain_level")
+    if pain_level is None:
+        pain_level = survey.get("pain_during_running_level_0_to_10")
+    if pain_level is None:
+        pain_level = survey.get("pain_during_running")
+
+    equipment = ", ".join(
+        survey.get("available_equipment") or []
+    )
+
     weekly_distance_text = "\n".join(
         f"- Week {week.get('week_number')}: {week.get('distance_km')} km"
         for week in content.get("weekly_distance", [])
@@ -66,22 +86,30 @@ def build_feedback_input(previous_recommendation: dict) -> str:
     ORIGINAL RUNNER INFORMATION
 
     Goal: {survey.get("goal")}
+    Target distance: {survey.get("target_distance")}
     Experience level: {survey.get("experience_level")}
     Current weekly distance: {
         survey.get("current_weekly_distance_km")
     } km
     Runs per week: {survey.get("runs_per_week")}
     Preferred training days: {", ".join(preferred_days)}
+    Preferred long-run day: {survey.get("preferred_long_run_day")}
+    Maximum session duration: {survey.get("max_session_minutes")} minutes
     Plan duration: {survey.get("plan_duration_weeks")} weeks
-    Current issue: {
-        survey.get("has_current_issue")
-        or survey.get("current_injury")
-    }
-    Pain level: {
-        survey.get("pain_during_running_level_0_to_10")
-        or survey.get("pain_during_running")
-    }
+    Plan start date: {survey.get("plan_start_date")}
+    Target event date: {survey.get("target_event_date")}
+    Preferred terrain: {survey.get("preferred_terrain")}
+    Available equipment: {equipment}
+    Current issue areas: {issue_areas_text}
+    Pain level: {pain_level}/10
+    Medical clearance: {survey.get("has_medical_clearance")}
+    Recovery level: {survey.get("recovery_level")}
+    Average sleep duration: {survey.get("average_sleep_duration")}
+    Stress level: {survey.get("stress_level")}
+    Diet type: {survey.get("diet_type")}
+    Weight: {survey.get("weight_kg")} kg
     Main preference: {survey.get("main_preference")}
+    Recommendation detail level: {survey.get("detail_level")}
 
     PREVIOUS RUNNING PLAN
 

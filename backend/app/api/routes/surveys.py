@@ -1,15 +1,23 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel, ValidationError
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.models.survey import Survey
 from app.models.user import User
-from app.schemas.survey import SurveyCreate, SurveyRead, SurveyUpdate
+from app.schemas.survey import RunningPlanSurveyAnswers, SurveyCreate, SurveyRead, SurveyUpdate
+from app.models.enums import RecommendationType
 
 router = APIRouter( prefix='/surveys',tags=['Surveys'],)
+
+
+@router.get('/forms/running-plan')
+def get_running_plan_survey_form():
+    return RunningPlanSurveyAnswers.model_json_schema()
+
 
 @router.post('/users/{user_id}', response_model=SurveyRead, status_code=status.HTTP_201_CREATED)
 def create_survey(
@@ -24,10 +32,16 @@ def create_survey(
             status_code=status.HTTP_404_NOT_FOUND,
             detail='User not found',
         )
+    answers = (
+        survey_data.answers.model_dump(mode="json")
+        if isinstance(survey_data.answers, BaseModel)
+        else survey_data.answers
+    )
+
     survey = Survey(
         user_id=user_id,
         survey_type=survey_data.survey_type,
-        answers=survey_data.answers,
+        answers=answers,
     )
 
     db.add(survey)
@@ -116,6 +130,22 @@ def update_survey(
         )
 
     update_data = survey_data.model_dump(exclude_unset=True)
+
+    if (
+            "answers" in update_data
+            and survey.survey_type == RecommendationType.RUNNING_PLAN
+    ):
+        try:
+            validated_answers = RunningPlanSurveyAnswers.model_validate(
+                update_data["answers"]
+            )
+        except ValidationError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail=exc.errors(include_context=False),
+            ) from exc
+
+        update_data["answers"] = validated_answers.model_dump(mode="json")
 
     for key, value in update_data.items():
         setattr(survey, key, value)
