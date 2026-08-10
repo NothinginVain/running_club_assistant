@@ -111,6 +111,12 @@ class Recommendation(Base):
         back_populates='recommendations',
     )
 
+    feedbacks: Mapped[list['Feedback']] = relationship(
+        back_populates='recommendation',
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+
     
 
 

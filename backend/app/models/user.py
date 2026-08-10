@@ -4,7 +4,7 @@ import uuid
 from datetime import date, datetime
 from typing import Any
 
-from sqlalchemy import Date, DateTime, String, func
+from sqlalchemy import Date, DateTime, Float, String, func
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -38,6 +38,11 @@ class User(Base):
 
     birth: Mapped[date | None] = mapped_column(
         Date,
+        nullable=True,
+    )
+
+    height_cm: Mapped[float | None] = mapped_column(
+        Float,
         nullable=True,
     )
 
@@ -77,4 +82,9 @@ class User(Base):
     surveys: Mapped[list['Survey']] = relationship(
         back_populates="user",
         cascade="all, delete, delete-orphan",
+    )
+
+    feedbacks: Mapped[list['Feedback']] = relationship(
+        back_populates="user",
+        passive_deletes=True,
     )
