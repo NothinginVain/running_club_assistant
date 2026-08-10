@@ -55,7 +55,7 @@
 #     main()
 
 from fastapi import FastAPI
-from app.api.routes import users, surveys, recommendations, chatbot
+from app.api.routes import users, surveys, recommendations, chatbot, feedbacks
 
 
 
@@ -70,5 +70,6 @@ app.include_router(users.router)
 app.include_router(surveys.router)
 app.include_router(recommendations.router)
 app.include_router(chatbot.router)
+app.include_router(feedbacks.router)
 
 # uvicorn app.main:app --reload --port 5002
