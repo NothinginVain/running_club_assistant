@@ -3,7 +3,11 @@ import os
 import requests
 from dotenv import load_dotenv
 
-from app.services.feedback_manager import execute_feedback_recommendation
+from app.services.feedback_manager import (
+    create_feedback_entry,
+    execute_feedback_recommendation,
+    get_feedback_entries,
+)
 from app.services.recommendation_manager import (
     delete_recommendation,
     execute_recommendation,
@@ -240,8 +244,10 @@ def recommendation_actions_flow(recommendation):
 
         print()
         print("1 - Toggle favorite")
-        print("2 - Leave feedback and generate revised plan")
-        print("3 - Delete recommendation")
+        print("2 - Leave feedback")
+        print("3 - View feedback history")
+        print("4 - Leave feedback and generate revised plan (legacy)")
+        print("5 - Delete recommendation")
         print("B - Back to recommendation list")
         print("M - Back to dashboard")
 
@@ -258,12 +264,20 @@ def recommendation_actions_flow(recommendation):
             continue
 
         if choice == "2":
+            leave_feedback_flow(recommendation)
+            continue
+
+        if choice == "3":
+            view_feedback_history_flow(recommendation)
+            continue
+
+        if choice == "4":
             revised = feedback_and_revise_flow(recommendation)
             show_recommendation_detail(revised)
             pause()
             return True
 
-        if choice == "3":
+        if choice == "5":
             deleted = delete_recommendation_flow(recommendation)
 
             if deleted:
@@ -408,6 +422,58 @@ def toggle_favorite_flow(recommendation):
     input("Press Enter to continue...")
 
     return updated
+
+
+def leave_feedback_flow(recommendation):
+    title("Leave Feedback")
+
+    while True:
+        feedback_text = input("Feedback: ").strip()
+
+        if feedback_text:
+            break
+
+        print("Feedback cannot be empty.")
+
+    created_feedback = create_feedback_entry(
+        recommendation["id"],
+        feedback_text,
+    )
+
+    print()
+    print("Feedback saved.")
+    print(f"Created: {format_date(created_feedback.get('created_at'))}")
+
+    pause()
+
+
+def view_feedback_history_flow(recommendation):
+    title("Feedback History")
+
+    feedback_entries = get_feedback_entries(
+        recommendation["id"],
+    )
+
+    if not feedback_entries:
+        print("No feedback has been submitted for this recommendation.")
+        pause()
+        return
+
+    print(f"Recommendation: {recommendation.get('title')}")
+    print()
+
+    for index, feedback_entry in enumerate(
+        feedback_entries,
+        start=1,
+    ):
+        print(
+            f"{index}. "
+            f"{format_date(feedback_entry.get('created_at'))}"
+        )
+        print(f"   {feedback_entry.get('feedback')}")
+        print()
+
+    pause()
 
 
 def feedback_and_revise_flow(recommendation):

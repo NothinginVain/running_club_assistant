@@ -13,6 +13,35 @@ load_dotenv()
 
 BASE_URL = os.getenv('BASE_URL')
 
+
+def create_feedback_entry(recommendation_id, feedback_text):
+    payload = {'feedback': feedback_text,}
+    response = requests.post(
+        f'{BASE_URL}/recommendations/{recommendation_id}/feedback',
+        json=payload,
+    )
+
+    if not response.ok:
+        print("Feedback API error:")
+        print(response.text)
+
+    response.raise_for_status()
+
+    return response.json()
+
+
+def get_feedback_entries(recommendation_id):
+    response = requests.get(f'{BASE_URL}/recommendations/{recommendation_id}/feedback')
+
+    if not response.ok:
+        print("Feedback API error:")
+        print(response.text)
+
+    response.raise_for_status()
+
+    return response.json()
+
+
 def build_feedback_payload():
     return {
         'feedback_rating': 4 ,
