@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 from app.services.feedback_manager import (
     create_feedback_entry,
-    execute_feedback_recommendation,
+    execute_remaining_plan_revision,
     get_feedback_entries,
 )
 from app.services.recommendation_manager import (
@@ -246,7 +246,7 @@ def recommendation_actions_flow(recommendation):
         print("1 - Toggle favorite")
         print("2 - Leave feedback")
         print("3 - View feedback history")
-        print("4 - Leave feedback and generate revised plan (legacy)")
+        print("4 - Generate revised plan from feedback")
         print("5 - Delete recommendation")
         print("B - Back to recommendation list")
         print("M - Back to dashboard")
@@ -272,7 +272,13 @@ def recommendation_actions_flow(recommendation):
             continue
 
         if choice == "4":
-            revised = feedback_and_revise_flow(recommendation)
+            revised = generate_revised_plan_flow(
+                recommendation
+            )
+
+            if revised is None:
+                continue
+
             show_recommendation_detail(revised)
             pause()
             return True
@@ -476,23 +482,36 @@ def view_feedback_history_flow(recommendation):
     pause()
 
 
-def feedback_and_revise_flow(recommendation):
-    title("Leave Feedback")
+def generate_revised_plan_flow(recommendation):
+    title("Generate Revised Plan")
 
-    rating = ask_feedback_rating()
-    comment = input("Feedback comment: ").strip()
-
-    feedback_payload = {
-        "feedback_rating": rating,
-        "feedback_comment": comment,
-    }
-
-    print("Saving feedback and generating revised recommendation...")
-
-    return execute_feedback_recommendation(
+    feedback_entries = get_feedback_entries(
         recommendation["id"],
-        feedback_payload,
-        "simple",
+    )
+
+    if not feedback_entries:
+        print("Add feedback before generating a revised plan.")
+        pause()
+        return None
+
+    print(
+        f"Using {len(feedback_entries)} feedback "
+        f"{'entry' if len(feedback_entries) == 1 else 'entries'}."
+    )
+
+    confirmation = input(
+        "Generate revised plan? (y/n): "
+    ).strip().lower()
+
+    if confirmation not in ("y", "yes"):
+        print("Revision cancelled.")
+        pause()
+        return None
+
+    print("Generating revised remaining plan...")
+
+    return execute_remaining_plan_revision(
+        recommendation,
     )
 
 
