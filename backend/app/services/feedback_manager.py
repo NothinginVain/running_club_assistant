@@ -1,13 +1,19 @@
 import json
 import os
+from datetime import date
+
 import requests
 from dotenv import load_dotenv
 from langfuse import observe
 
 from app.client_openai import get_recommendation
+from app.prompts.feedback_input import (
+    build_feedback_input,
+    build_feedback_revision_input,
+)
 from app.prompts.feedback_prompt import get_feedback_prompt
-from app.prompts.feedback_input import build_feedback_input
-from app.services.recommendation_manager import save_recommendation
+from app.services.plan_revision_service import build_remaining_plan_context
+from app.services.recommendation_manager import get_user, save_recommendation
 
 load_dotenv()
 
@@ -79,6 +85,55 @@ def execute_feedback_recommendation(recommendation_id, user_feedback, prompt_ver
     saved_feedback_recommendation = save_feedback(recommendation_id,user_feedback)
     new_recommendation = generate_feedback_recommendation(saved_feedback_recommendation, prompt_version)
     payload = build_feedback_recommendation_package(saved_feedback_recommendation, new_recommendation)
+
+    return save_recommendation(payload)
+
+
+@observe(name='remaining_plan_revision_execution')
+def execute_remaining_plan_revision(
+        recommendation,
+        revision_date=None,
+        prompt_version='remaining',
+):
+    feedback_entries = get_feedback_entries(recommendation['id'])
+
+    if not feedback_entries:
+        raise ValueError(
+            'The selected recommendation has no feedback'
+        )
+
+    user = get_user(
+        recommendation['user_id'],
+    )
+
+    effective_revision_date = (
+        revision_date or date.today()
+    )
+
+    remaining_plan = build_remaining_plan_context(
+        recommendation,
+        effective_revision_date,
+    )
+
+    instructions = get_feedback_prompt(prompt_version)
+
+    input_text = build_feedback_revision_input(
+        user,
+        recommendation,
+        feedback_entries,
+        remaining_plan,
+    )
+
+    revised_recommendation = get_recommendation(
+        input_text,
+        instructions,
+        prompt_version,
+    )
+
+    payload = build_feedback_recommendation_package(
+        recommendation,
+        revised_recommendation,
+    )
 
     return save_recommendation(payload)
 
