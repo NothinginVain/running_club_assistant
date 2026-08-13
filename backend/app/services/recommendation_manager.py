@@ -5,6 +5,7 @@ import requests
 from app.client_openai import get_recommendation
 from app.prompts.running_plan_prompt import get_running_plan_prompt
 from app.prompts.running_plan_input import build_running_plan_input
+from app.services.running_plan_service import synchronize_weekly_distances
 from dotenv import load_dotenv
 import os
 
@@ -37,7 +38,10 @@ def get_latest_survey(user_id):
 def generate_recommendation(user, survey, prompt_version='simple'):
     instructions = get_running_plan_prompt(prompt_version)
     input_text = build_running_plan_input(user, survey)
-    return get_recommendation(input_text, instructions, prompt_version)
+
+    recommendation = get_recommendation(input_text, instructions, prompt_version)
+
+    return synchronize_weekly_distances(recommendation)
 
 
 # 3 - construct the full recommendation package which is aligned with data schema
@@ -128,7 +132,7 @@ def delete_recommendation(recommendation_id):
     return None
 
 @observe(name='recommendation_execution')
-def execute_recommendation(user_id, prompt_version='medium3'):
+def execute_recommendation(user_id, prompt_version='medium4'):
     survey = get_latest_survey(user_id)
     user = get_user(user_id)
     recommendation = generate_recommendation(user, survey, prompt_version)
