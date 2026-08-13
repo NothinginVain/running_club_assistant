@@ -6,18 +6,30 @@ import requests
 from dotenv import load_dotenv
 from langfuse import observe
 
-from app.client_openai import get_recommendation
+from app.client_openai import get_feedback_safety_assessment, get_recommendation
 from app.prompts.feedback_input import (
     build_feedback_input,
     build_feedback_revision_input,
 )
 from app.prompts.feedback_prompt import get_feedback_prompt
+from app.prompts.feedback_safety_prompt import get_feedback_safety_prompt
+from app.prompts.feedback_safety_input import build_feedback_safety_input
 from app.services.plan_revision_service import build_remaining_plan_context
 from app.services.recommendation_manager import get_user, save_recommendation
+from app.services.running_plan_service import synchronize_weekly_distances
 
 load_dotenv()
 
 BASE_URL = os.getenv('BASE_URL')
+
+class HealthUpdateRequiredError(Exception):
+    def __init__(
+            self,
+            message: str,
+            questions: list[str],
+    ):
+        super().__init__(message)
+        self.questions = questions
 
 
 def create_feedback_entry(recommendation_id, feedback_text):
@@ -46,6 +58,27 @@ def get_feedback_entries(recommendation_id):
     response.raise_for_status()
 
     return response.json()
+
+
+def assess_feedback_safety(
+        recommendation,
+        feedback_entries,
+        prompt_version="safety1",
+):
+    instructions = get_feedback_safety_prompt(
+        prompt_version,
+    )
+
+    input_text = build_feedback_safety_input(
+        recommendation,
+        feedback_entries,
+    )
+
+    return get_feedback_safety_assessment(
+        input_text,
+        instructions,
+        prompt_version,
+    )
 
 
 def build_feedback_payload():
@@ -102,6 +135,20 @@ def execute_remaining_plan_revision(
             'The selected recommendation has no feedback'
         )
 
+    safety_assessment = assess_feedback_safety(
+        recommendation,
+        feedback_entries,
+    )
+
+    if (
+        safety_assessment['decision']
+        == 'needs_health_update'
+    ):
+        raise HealthUpdateRequiredError(
+            safety_assessment['message'],
+            safety_assessment['questions'],
+        )
+
     user = get_user(
         recommendation['user_id'],
     )
@@ -129,6 +176,9 @@ def execute_remaining_plan_revision(
         instructions,
         prompt_version,
     )
+
+    revised_recommendation = synchronize_weekly_distances(
+        revised_recommendation)
 
     payload = build_feedback_recommendation_package(
         recommendation,

@@ -4,6 +4,7 @@ import requests
 from dotenv import load_dotenv
 
 from app.services.feedback_manager import (
+    HealthUpdateRequiredError,
     create_feedback_entry,
     execute_remaining_plan_revision,
     get_feedback_entries,
@@ -510,9 +511,25 @@ def generate_revised_plan_flow(recommendation):
 
     print("Generating revised remaining plan...")
 
-    return execute_remaining_plan_revision(
-        recommendation,
-    )
+    try:
+        return execute_remaining_plan_revision(
+            recommendation,
+        )
+    except HealthUpdateRequiredError as error:
+        print()
+        print("Plan revision paused for safety.")
+        print(error)
+        print()
+        print("Please provide the following health information:")
+
+        for question in error.questions:
+            print(f"- {question}")
+
+        print()
+        print("No revised plan was generated or saved.")
+        pause()
+
+        return None
 
 
 def ask_feedback_rating():
