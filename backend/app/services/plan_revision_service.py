@@ -1,6 +1,10 @@
 from datetime import date
 from typing import Any
 
+from app.services.running_plan_service import (
+    calculate_weekly_distance_totals,
+)
+
 
 def build_remaining_plan_context(
         recommendation: dict[str, Any],
@@ -36,10 +40,23 @@ def build_remaining_plan_context(
         training_day['week_number'] for training_day in remaining_training_days
     }
 
+    remaining_distance_by_week = (
+        calculate_weekly_distance_totals(
+            remaining_training_days
+        )
+    )
+
     remaining_weekly_distance = [
-        week for week in weekly_distance
+        {
+            **week,
+            'distance_km': remaining_distance_by_week.get(
+                week['week_number'],
+                0,
+            ),
+        }
+        for week in weekly_distance
         if week['week_number'] in remaining_week_numbers
-           ]
+    ]
 
     return {
         'revision_date': revision_date.isoformat(),
