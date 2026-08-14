@@ -140,9 +140,5 @@ def execute_recommendation(user_id, prompt_version='medium4'):
     saved_recommendation = save_recommendation(payload)
     return saved_recommendation
 
-if __name__ == '__main__':
-    test_user_id = '328cae0c-b9fe-4d3e-ac20-7fc642b406e1'
-    result = execute_recommendation(test_user_id)
-    print(json.dumps(result, indent=4, ensure_ascii=False))
 
 # uvicorn app.main:app --reload --port 5002  -> to be able activate the apis thro terminal

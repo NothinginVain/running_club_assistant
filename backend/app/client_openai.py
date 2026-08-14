@@ -1,4 +1,3 @@
-import json
 from typing import Any
 from dotenv import load_dotenv
 from langfuse.openai import OpenAI
