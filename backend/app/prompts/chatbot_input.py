@@ -19,44 +19,6 @@ def _format_conversation(conversation_history: list[dict[str, str]]) -> str:
     return conversation_text or "No messages yet this session."
 
 
-def _format_recommendations(
-    recommendations: list[dict[str, Any]],
-) -> str:
-    lines = []
-
-    for recommendation in recommendations:
-        title = recommendation.get("title") or "Untitled plan"
-        summary = recommendation.get("summary") or "No summary available."
-
-        lines.append(f"- {title}: {summary}")
-
-    return "\n".join(lines) or "No previous recommendations."
-
-
-def _format_feedback(
-    feedback_entries: list[dict[str, Any]],
-) -> str:
-    lines = []
-
-    for feedback in feedback_entries:
-        title = feedback.get("title") or "Unknown plan"
-        rating = feedback.get("rating")
-        comment = feedback.get("comment") or "No comment provided."
-
-        rating_text = (
-            f"{rating}/5"
-            if rating is not None
-            else "Not rated"
-        )
-
-        lines.append(
-            f"- {title} — Rating: {rating_text}; "
-            f"Comment: {comment}"
-        )
-
-    return "\n".join(lines) or "No previous feedback."
-
-
 def build_chatbot_input(
     message: str,
     user: dict[str, Any],
@@ -65,8 +27,6 @@ def build_chatbot_input(
     knowledge_documents: list[dict[str, Any]],
 ) -> str:
     chat_memory = memory.get("chat", {})
-    recommendations = memory.get("recommendations", [])
-    feedback = memory.get("feedback", [])
 
     return f"""
     RUNNER PROFILE
@@ -80,11 +40,6 @@ def build_chatbot_input(
     Current goal: {chat_memory.get("current_goal")}
     Preferences: {chat_memory.get("preferences")}
     Progress: {chat_memory.get("progress")}
-    Previous recommendations:
-    {_format_recommendations(recommendations)}
-
-    Previous feedback:
-    {_format_feedback(feedback)}
 
     CONVERSATION SO FAR (this session)
 
@@ -108,8 +63,6 @@ def build_conversation_summary_input(
     conversation_history: list[dict[str, str]],
 ) -> str:
     chat_memory = memory.get("chat", {})
-    recommendations = memory.get("recommendations", [])
-    feedback = memory.get("feedback", [])
 
     return f"""
     RUNNER PROFILE
@@ -123,18 +76,12 @@ def build_conversation_summary_input(
     Current goal: {chat_memory.get("current_goal")}
     Preferences: {chat_memory.get("preferences")}
     Progress: {chat_memory.get("progress")}
-    Previous recommendations:
-    {_format_recommendations(recommendations)}
-
-    Previous feedback:
-    {_format_feedback(feedback)}
 
     FULL CONVERSATION FROM THIS SESSION
 
     {_format_conversation(conversation_history)}
 
     Produce an updated chat summary that merges the previous chat summary with anything
-    new learned from this session's conversation (goal changes, preferences, progress, plans
-    discussed, feedback given). Carry forward anything from the previous summary that is still
-    valid and wasn't contradicted in this session.
+    new learned from this session's conversation. Carry forward anything from the previous
+    summary that is still valid and wasn't contradicted in this session.
     """.strip()

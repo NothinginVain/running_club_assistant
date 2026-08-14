@@ -195,15 +195,11 @@ def chat_with_coach_flow():
 
             summary = response.json().get("summary", {})
             chat_memory = summary.get("chat", {})
-            recommendations = summary.get("recommendations", [])
-            feedback = summary.get("feedback", [])
 
             print("\nMemory updated:")
             print(f"  Current goal: {chat_memory.get('current_goal')}")
             print(f"  Preferences: {chat_memory.get('preferences')}")
             print(f"  Progress: {chat_memory.get('progress')}")
-            print(f"  Recommendations stored: {len(recommendations)}")
-            print(f"  Feedback entries stored: {len(feedback)}")
             input("\nPress Enter to return to dashboard...")
             return
 

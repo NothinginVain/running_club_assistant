@@ -72,7 +72,6 @@ def chat_with_coach(
     ]
 
     coach_memory.summary = {
-        **coach_memory.summary,
         "chat": {
             **chat_memory,
             "current_conversation": updated_conversation,
@@ -127,7 +126,6 @@ def end_chat(
     )
 
     coach_memory.summary = {
-        **coach_memory.summary,
         "chat": {
             **updated_chat_summary,
             "current_conversation": [],
