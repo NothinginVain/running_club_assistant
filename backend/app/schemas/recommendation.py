@@ -36,9 +36,8 @@ class RecommendationRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class RecommendationFeedbackUpdate(BaseModel):
+class RecommendationRatingUpdate(BaseModel):
     feedback_rating: int = Field(ge=1, le=5)
-    feedback_comment: str | None = None
 
 
 class RecommendationFavoriteUpdate(BaseModel):

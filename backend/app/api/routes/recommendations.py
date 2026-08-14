@@ -11,7 +11,7 @@ from app.models.survey import Survey
 from app.schemas.recommendation import (
     RecommendationCreate,
     RecommendationFavoriteUpdate,
-    RecommendationFeedbackUpdate,
+    RecommendationRatingUpdate,
     RecommendationRead,
 )
 
@@ -130,22 +130,27 @@ def get_recommendation(
     return  recommendation
 
 
-@router.patch('/{recommendation_id}/feedback', response_model=RecommendationRead)
-def update_recommendation_feedback(
-        recommendation_id: UUID,
-        feedback_data: RecommendationFeedbackUpdate,
-        db: Session = Depends(get_db),
+@router.patch(
+    "/{recommendation_id}/rating",
+    response_model=RecommendationRead,
+)
+def update_recommendation_rating(
+    recommendation_id: UUID,
+    rating_data: RecommendationRatingUpdate,
+    db: Session = Depends(get_db),
 ):
-    recommendation = db.get(Recommendation, recommendation_id)
+    recommendation = db.get(
+        Recommendation,
+        recommendation_id,
+    )
 
     if recommendation is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail='Recommendation not found',
+            detail="Recommendation not found",
         )
 
-    recommendation.feedback_rating = feedback_data.feedback_rating
-    recommendation.feedback_comment = feedback_data.feedback_comment
+    recommendation.feedback_rating = rating_data.feedback_rating
 
     db.commit()
     db.refresh(recommendation)
@@ -153,18 +158,24 @@ def update_recommendation_feedback(
     return recommendation
 
 
-@router.patch('/{recommendation_id}/favorite', response_model=RecommendationRead)
+@router.patch(
+    "/{recommendation_id}/favorite",
+    response_model=RecommendationRead,
+)
 def update_recommendation_favorite(
-        recommendation_id: UUID,
-        favorite_data: RecommendationFavoriteUpdate,
-        db: Session = Depends(get_db)
+    recommendation_id: UUID,
+    favorite_data: RecommendationFavoriteUpdate,
+    db: Session = Depends(get_db),
 ):
-    recommendation = db.get(Recommendation, recommendation_id)
+    recommendation = db.get(
+        Recommendation,
+        recommendation_id,
+    )
 
-    if not recommendation:
+    if recommendation is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail='Recommendation not found',
+            detail="Recommendation not found",
         )
 
     recommendation.is_favorite = favorite_data.is_favorite

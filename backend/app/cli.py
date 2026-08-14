@@ -17,6 +17,7 @@ from app.services.recommendation_manager import (
     get_recommendation_by_id,
     get_recommendations_by_user,
     update_favorite_recommendation,
+    update_recommendation_rating,
 )
 from app.services.survey_manager import (
     build_sample_survey,
@@ -245,7 +246,8 @@ def recommendation_actions_flow(recommendation):
         print("2 - Leave feedback")
         print("3 - View feedback history")
         print("4 - Generate revised plan from feedback")
-        print("5 - Delete recommendation")
+        print("5 - Rate or change rating")
+        print("6 - Delete recommendation")
         print("B - Back to recommendation list")
         print("M - Back to dashboard")
 
@@ -282,6 +284,13 @@ def recommendation_actions_flow(recommendation):
             return True
 
         if choice == "5":
+            recommendation = rate_recommendation_flow(
+                recommendation
+            )
+            continue
+
+
+        if choice == "6":
             deleted = delete_recommendation_flow(recommendation)
 
             if deleted:
@@ -424,6 +433,33 @@ def toggle_favorite_flow(recommendation):
 
     print(f"Favorite set to: {favorite_label(updated)}")
     input("Press Enter to continue...")
+
+    return updated
+
+
+def rate_recommendation_flow(recommendation):
+    title("Rate Recommendation")
+
+    while True:
+        value = input(
+            "Rating from 1 to 5 (B to cancel): "
+        ).strip().lower()
+
+        if value == "b":
+            return recommendation
+
+        if value.isdigit() and 1 <= int(value) <= 5:
+            break
+
+        print("Rating must be a number from 1 to 5.")
+
+    updated = update_recommendation_rating(
+        recommendation["id"],
+        int(value),
+    )
+
+    print(f"Rating set to: {rating_label(updated)}")
+    pause()
 
     return updated
 

@@ -121,6 +121,27 @@ def update_favorite_recommendation(recommendation_id, favorite):
     return response.json()
 
 
+def update_recommendation_rating(
+    recommendation_id,
+    rating,
+):
+    payload = {
+        "feedback_rating": rating,
+    }
+
+    response = requests.patch(
+        f"{BASE_URL}/recommendations/{recommendation_id}/rating",
+        json=payload,
+    )
+
+    if not response.ok:
+        print("Recommendation API error:")
+        print(response.text)
+
+    response.raise_for_status()
+    return response.json()
+
+
 def delete_recommendation(recommendation_id):
     response = requests.delete(f'{BASE_URL}/recommendations/{recommendation_id}')
 
