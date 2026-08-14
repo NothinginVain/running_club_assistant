@@ -4,6 +4,7 @@ import requests
 from dotenv import load_dotenv
 
 from app.services.feedback_manager import (
+    CoachReviewRequiredError,
     HealthUpdateRequiredError,
     create_feedback_entry,
     execute_remaining_plan_revision,
@@ -25,7 +26,7 @@ from app.services.survey_manager import (
 
 load_dotenv()
 
-DEFAULT_USER_ID = "a093dea6-f660-43e6-9769-becb6500ed8a"
+DEFAULT_USER_ID = "7eebf305-38f5-4a57-97b2-ee72936f3a2c"
 
 
 def clear_space():
@@ -483,6 +484,69 @@ def view_feedback_history_flow(recommendation):
     pause()
 
 
+def collect_health_update_flow(
+        recommendation,
+        questions,
+):
+    print()
+    print("Please provide the following health information:")
+
+    for index, question in enumerate(questions, start=1):
+        print(f"{index}. {question}")
+
+    confirmation = input(
+        "\nAnswer these questions now? (y/n): "
+    ).strip().lower()
+
+    if confirmation not in ("y", "yes"):
+        print("No health update was saved.")
+        pause()
+        return
+
+    health_update_parts = [
+        "Health update after a reported injury or health concern:"
+    ]
+
+    for index, question in enumerate(questions, start=1):
+        print()
+        print(f"{index}. {question}")
+
+        while True:
+            answer = input("Answer: ").strip()
+
+            if answer:
+                break
+
+            print("Answer cannot be empty.")
+
+        health_update_parts.append(
+            f"{index}. {question}\n"
+            f"Answer: {answer}"
+        )
+
+    health_update_text = "\n\n".join(
+        health_update_parts
+    )
+
+    created_feedback = create_feedback_entry(
+        recommendation["id"],
+        health_update_text,
+    )
+
+    print()
+    print("Health update saved.")
+    print(
+        f"Created: "
+        f"{format_date(created_feedback.get('created_at'))}"
+    )
+    print(
+        "Automatic injury-related revisions remain paused "
+        "until qualified human review is available."
+    )
+
+    pause()
+
+
 def generate_revised_plan_flow(recommendation):
     title("Generate Revised Plan")
 
@@ -520,32 +584,28 @@ def generate_revised_plan_flow(recommendation):
         print("Plan revision paused for safety.")
         print(error)
         print()
-        print("Please provide the following health information:")
+        print("No revised plan was generated or saved.")
 
-        for question in error.questions:
-            print(f"- {question}")
+        collect_health_update_flow(
+            recommendation,
+            error.questions,
+        )
 
+        return None
+    except CoachReviewRequiredError as error:
+        print()
+        print("Automatic plan revision paused.")
+        print(error)
+        print()
+        print(
+            "Injury-related plan changes require review by a "
+            "qualified club coach or healthcare professional."
+        )
         print()
         print("No revised plan was generated or saved.")
         pause()
 
         return None
-
-
-def ask_feedback_rating():
-    while True:
-        value = input("Rating 1-5: ").strip()
-
-        try:
-            rating = int(value)
-        except ValueError:
-            print("Please enter a number from 1 to 5.")
-            continue
-
-        if 1 <= rating <= 5:
-            return rating
-
-        print("Please enter a number from 1 to 5.")
 
 
 def delete_recommendation_flow(recommendation):
