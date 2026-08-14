@@ -1,3 +1,4 @@
+import json
 from typing import Any
 
 
@@ -21,7 +22,7 @@ def _format_conversation(conversation_history: list[dict[str, str]]) -> str:
 
 def build_chatbot_input(
     message: str,
-    user: dict[str, Any],
+    coach_context: dict[str, Any],
     memory: dict[str, Any],
     conversation_history: list[dict[str, str]],
     knowledge_documents: list[dict[str, Any]],
@@ -29,11 +30,9 @@ def build_chatbot_input(
     chat_memory = memory.get("chat", {})
 
     return f"""
-    RUNNER PROFILE
+    LIVE RUNNER BACKGROUND (current database data, read-only)
 
-    Name: {user.get("full_name")}
-    Interests: {user.get("interests")}
-    Shoe size: {user.get("shoe_size")}
+    {json.dumps(coach_context, ensure_ascii=False)}
 
     RUNNER MEMORY SUMMARY (from previous sessions)
 
@@ -53,7 +52,7 @@ def build_chatbot_input(
 
     {message}
 
-    Reply to the runner's message using the profile, memory summary, conversation so far, and knowledge documents above.
+    Reply using the live runner background, memory summary, conversation, and knowledge documents above.
     """.strip()
 
 

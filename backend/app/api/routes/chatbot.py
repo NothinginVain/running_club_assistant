@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.services.coach_context_service import build_coach_context
 from app.services.coach_memory_manager import get_or_create_coach_memory
 from app.client_openai import get_chat_reply, summarize_conversation
 from app.db.session import get_db
@@ -47,11 +48,15 @@ def chat_with_coach(
     )
 
     knowledge_documents = db.scalars(select(KnowledgeBase)).all()
+    coach_context = build_coach_context(
+        db,
+        user,
+    )
 
     instructions = get_chatbot_prompt()
     input_text = build_chatbot_input(
         chat_data.message,
-        _user_profile(user),
+        coach_context,
         coach_memory.summary,
         conversation_history,
         [
