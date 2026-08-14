@@ -17,6 +17,7 @@ from app.services.running_plan_service import synchronize_weekly_distances
 load_dotenv()
 
 BASE_URL = os.getenv('BASE_URL')
+REVISION_MARKER = " — Revised "
 
 
 HEALTH_UPDATE_QUESTIONS: tuple[str, ...] = (
@@ -52,6 +53,18 @@ class HealthUpdateRequiredError(Exception):
 
 class CoachReviewRequiredError(Exception):
     pass
+
+
+def build_revision_title(title: str) -> str:
+    base_title, marker, revision_value = title.rpartition(
+        REVISION_MARKER
+    )
+
+    if marker and revision_value.isdigit():
+        revision_number = int(revision_value) + 1
+        return f"{base_title}{REVISION_MARKER}{revision_number}"
+
+    return f"{title}{REVISION_MARKER}1"
 
 
 def create_feedback_entry(recommendation_id, feedback_text):
@@ -110,7 +123,9 @@ def build_feedback_recommendation_package(
     return {
         'survey_id': previous_recommendation['survey_id'],
         'recommendation_type': previous_recommendation['recommendation_type'],
-        'title': new_recommendation['title'],
+        'title': build_revision_title(
+            previous_recommendation['title'],
+        ),
         'content': new_recommendation['content'],
         'explanation': new_recommendation.get('explanation'),
     }
