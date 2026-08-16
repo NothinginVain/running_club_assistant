@@ -111,7 +111,3 @@ class Recommendation(Base):
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
-
-    
-
-
