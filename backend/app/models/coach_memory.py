@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import DateTime, ForeignKey, Integer, func
+from sqlalchemy import DateTime, ForeignKey, func
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -30,18 +30,6 @@ class CoachMemory(Base):
 
     summary: Mapped[dict[str, Any]] = mapped_column(
         JSONB,
-        nullable=False,
-    )
-
-    source_recommendation_count: Mapped[int] = mapped_column(
-        Integer,
-        default=0,
-        nullable=False,
-    )
-
-    source_feedback_count: Mapped[int] = mapped_column(
-        Integer,
-        default=0,
         nullable=False,
     )
 

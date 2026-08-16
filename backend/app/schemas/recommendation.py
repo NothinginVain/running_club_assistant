@@ -27,7 +27,6 @@ class RecommendationRead(BaseModel):
     survey_snapshot: dict[str, Any]
 
     feedback_rating: int | None = None
-    feedback_comment: str | None = None
     is_favorite: bool
 
     created_at: datetime
@@ -36,9 +35,8 @@ class RecommendationRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class RecommendationFeedbackUpdate(BaseModel):
+class RecommendationRatingUpdate(BaseModel):
     feedback_rating: int = Field(ge=1, le=5)
-    feedback_comment: str | None = None
 
 
 class RecommendationFavoriteUpdate(BaseModel):

@@ -5,6 +5,7 @@ import requests
 from app.client_openai import get_recommendation
 from app.prompts.running_plan_prompt import get_running_plan_prompt
 from app.prompts.running_plan_input import build_running_plan_input
+from app.services.running_plan_service import synchronize_weekly_distances
 from dotenv import load_dotenv
 import os
 
@@ -37,7 +38,10 @@ def get_latest_survey(user_id):
 def generate_recommendation(user, survey, prompt_version='simple'):
     instructions = get_running_plan_prompt(prompt_version)
     input_text = build_running_plan_input(user, survey)
-    return get_recommendation(input_text, instructions, prompt_version)
+
+    recommendation = get_recommendation(input_text, instructions, prompt_version)
+
+    return synchronize_weekly_distances(recommendation)
 
 
 # 3 - construct the full recommendation package which is aligned with data schema
@@ -117,6 +121,27 @@ def update_favorite_recommendation(recommendation_id, favorite):
     return response.json()
 
 
+def update_recommendation_rating(
+    recommendation_id,
+    rating,
+):
+    payload = {
+        "feedback_rating": rating,
+    }
+
+    response = requests.patch(
+        f"{BASE_URL}/recommendations/{recommendation_id}/rating",
+        json=payload,
+    )
+
+    if not response.ok:
+        print("Recommendation API error:")
+        print(response.text)
+
+    response.raise_for_status()
+    return response.json()
+
+
 def delete_recommendation(recommendation_id):
     response = requests.delete(f'{BASE_URL}/recommendations/{recommendation_id}')
 
@@ -128,7 +153,7 @@ def delete_recommendation(recommendation_id):
     return None
 
 @observe(name='recommendation_execution')
-def execute_recommendation(user_id, prompt_version='medium3'):
+def execute_recommendation(user_id, prompt_version='medium4'):
     survey = get_latest_survey(user_id)
     user = get_user(user_id)
     recommendation = generate_recommendation(user, survey, prompt_version)
@@ -136,9 +161,5 @@ def execute_recommendation(user_id, prompt_version='medium3'):
     saved_recommendation = save_recommendation(payload)
     return saved_recommendation
 
-if __name__ == '__main__':
-    test_user_id = '328cae0c-b9fe-4d3e-ac20-7fc642b406e1'
-    result = execute_recommendation(test_user_id)
-    print(json.dumps(result, indent=4, ensure_ascii=False))
 
 # uvicorn app.main:app --reload --port 5002  -> to be able activate the apis thro terminal

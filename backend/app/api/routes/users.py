@@ -31,6 +31,7 @@ def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
         password_hash=fake_hash_password(user_data.password),
         gender=user_data.gender,
         birth=user_data.birth,
+        height_cm=user_data.height_cm,
         address=user_data.address,
         social_media=user_data.social_media,
         shoe_size=user_data.shoe_size,

@@ -3,7 +3,13 @@ import os
 import requests
 from dotenv import load_dotenv
 
-from app.services.feedback_manager import execute_feedback_recommendation
+from app.services.feedback_manager import (
+    CoachReviewRequiredError,
+    HealthUpdateRequiredError,
+    create_feedback_entry,
+    execute_remaining_plan_revision,
+    get_feedback_entries,
+)
 from app.services.recommendation_manager import (
     delete_recommendation,
     execute_recommendation,
@@ -11,6 +17,7 @@ from app.services.recommendation_manager import (
     get_recommendation_by_id,
     get_recommendations_by_user,
     update_favorite_recommendation,
+    update_recommendation_rating,
 )
 from app.services.survey_manager import (
     build_sample_survey,
@@ -20,7 +27,7 @@ from app.services.survey_manager import (
 
 load_dotenv()
 
-DEFAULT_USER_ID = "a093dea6-f660-43e6-9769-becb6500ed8a"
+DEFAULT_USER_ID = "7eebf305-38f5-4a57-97b2-ee72936f3a2c"
 
 
 def clear_space():
@@ -189,15 +196,11 @@ def chat_with_coach_flow():
 
             summary = response.json().get("summary", {})
             chat_memory = summary.get("chat", {})
-            recommendations = summary.get("recommendations", [])
-            feedback = summary.get("feedback", [])
 
             print("\nMemory updated:")
             print(f"  Current goal: {chat_memory.get('current_goal')}")
             print(f"  Preferences: {chat_memory.get('preferences')}")
             print(f"  Progress: {chat_memory.get('progress')}")
-            print(f"  Recommendations stored: {len(recommendations)}")
-            print(f"  Feedback entries stored: {len(feedback)}")
             input("\nPress Enter to return to dashboard...")
             return
 
@@ -240,8 +243,11 @@ def recommendation_actions_flow(recommendation):
 
         print()
         print("1 - Toggle favorite")
-        print("2 - Leave feedback and generate revised plan")
-        print("3 - Delete recommendation")
+        print("2 - Leave feedback")
+        print("3 - View feedback history")
+        print("4 - Generate revised plan from feedback")
+        print("5 - Rate or change rating")
+        print("6 - Delete recommendation")
         print("B - Back to recommendation list")
         print("M - Back to dashboard")
 
@@ -258,12 +264,33 @@ def recommendation_actions_flow(recommendation):
             continue
 
         if choice == "2":
-            revised = feedback_and_revise_flow(recommendation)
+            leave_feedback_flow(recommendation)
+            continue
+
+        if choice == "3":
+            view_feedback_history_flow(recommendation)
+            continue
+
+        if choice == "4":
+            revised = generate_revised_plan_flow(
+                recommendation
+            )
+
+            if revised is None:
+                continue
+
             show_recommendation_detail(revised)
             pause()
             return True
 
-        if choice == "3":
+        if choice == "5":
+            recommendation = rate_recommendation_flow(
+                recommendation
+            )
+            continue
+
+
+        if choice == "6":
             deleted = delete_recommendation_flow(recommendation)
 
             if deleted:
@@ -410,40 +437,207 @@ def toggle_favorite_flow(recommendation):
     return updated
 
 
-def feedback_and_revise_flow(recommendation):
-    title("Leave Feedback")
+def rate_recommendation_flow(recommendation):
+    title("Rate Recommendation")
 
-    rating = ask_feedback_rating()
-    comment = input("Feedback comment: ").strip()
+    while True:
+        value = input(
+            "Rating from 1 to 5 (B to cancel): "
+        ).strip().lower()
 
-    feedback_payload = {
-        "feedback_rating": rating,
-        "feedback_comment": comment,
-    }
+        if value == "b":
+            return recommendation
 
-    print("Saving feedback and generating revised recommendation...")
+        if value.isdigit() and 1 <= int(value) <= 5:
+            break
 
-    return execute_feedback_recommendation(
+        print("Rating must be a number from 1 to 5.")
+
+    updated = update_recommendation_rating(
         recommendation["id"],
-        feedback_payload,
-        "simple",
+        int(value),
     )
 
+    print(f"Rating set to: {rating_label(updated)}")
+    pause()
 
-def ask_feedback_rating():
+    return updated
+
+
+def leave_feedback_flow(recommendation):
+    title("Leave Feedback")
+
     while True:
-        value = input("Rating 1-5: ").strip()
+        feedback_text = input("Feedback: ").strip()
 
-        try:
-            rating = int(value)
-        except ValueError:
-            print("Please enter a number from 1 to 5.")
-            continue
+        if feedback_text:
+            break
 
-        if 1 <= rating <= 5:
-            return rating
+        print("Feedback cannot be empty.")
 
-        print("Please enter a number from 1 to 5.")
+    created_feedback = create_feedback_entry(
+        recommendation["id"],
+        feedback_text,
+    )
+
+    print()
+    print("Feedback saved.")
+    print(f"Created: {format_date(created_feedback.get('created_at'))}")
+
+    pause()
+
+
+def view_feedback_history_flow(recommendation):
+    title("Feedback History")
+
+    feedback_entries = get_feedback_entries(
+        recommendation["id"],
+    )
+
+    if not feedback_entries:
+        print("No feedback has been submitted for this recommendation.")
+        pause()
+        return
+
+    print(f"Recommendation: {recommendation.get('title')}")
+    print()
+
+    for index, feedback_entry in enumerate(
+        feedback_entries,
+        start=1,
+    ):
+        print(
+            f"{index}. "
+            f"{format_date(feedback_entry.get('created_at'))}"
+        )
+        print(f"   {feedback_entry.get('feedback')}")
+        print()
+
+    pause()
+
+
+def collect_health_update_flow(
+        recommendation,
+        questions,
+):
+    print()
+    print("Please provide the following health information:")
+
+    for index, question in enumerate(questions, start=1):
+        print(f"{index}. {question}")
+
+    confirmation = input(
+        "\nAnswer these questions now? (y/n): "
+    ).strip().lower()
+
+    if confirmation not in ("y", "yes"):
+        print("No health update was saved.")
+        pause()
+        return
+
+    health_update_parts = [
+        "Health update after a reported injury or health concern:"
+    ]
+
+    for index, question in enumerate(questions, start=1):
+        print()
+        print(f"{index}. {question}")
+
+        while True:
+            answer = input("Answer: ").strip()
+
+            if answer:
+                break
+
+            print("Answer cannot be empty.")
+
+        health_update_parts.append(
+            f"{index}. {question}\n"
+            f"Answer: {answer}"
+        )
+
+    health_update_text = "\n\n".join(
+        health_update_parts
+    )
+
+    created_feedback = create_feedback_entry(
+        recommendation["id"],
+        health_update_text,
+    )
+
+    print()
+    print("Health update saved.")
+    print(
+        f"Created: "
+        f"{format_date(created_feedback.get('created_at'))}"
+    )
+    print(
+        "Automatic injury-related revisions remain paused "
+        "until qualified human review is available."
+    )
+
+    pause()
+
+
+def generate_revised_plan_flow(recommendation):
+    title("Generate Revised Plan")
+
+    feedback_entries = get_feedback_entries(
+        recommendation["id"],
+    )
+
+    if not feedback_entries:
+        print("Add feedback before generating a revised plan.")
+        pause()
+        return None
+
+    print(
+        f"Using {len(feedback_entries)} feedback "
+        f"{'entry' if len(feedback_entries) == 1 else 'entries'}."
+    )
+
+    confirmation = input(
+        "Generate revised plan? (y/n): "
+    ).strip().lower()
+
+    if confirmation not in ("y", "yes"):
+        print("Revision cancelled.")
+        pause()
+        return None
+
+    print("Generating revised remaining plan...")
+
+    try:
+        return execute_remaining_plan_revision(
+            recommendation,
+        )
+    except HealthUpdateRequiredError as error:
+        print()
+        print("Plan revision paused for safety.")
+        print(error)
+        print()
+        print("No revised plan was generated or saved.")
+
+        collect_health_update_flow(
+            recommendation,
+            error.questions,
+        )
+
+        return None
+    except CoachReviewRequiredError as error:
+        print()
+        print("Automatic plan revision paused.")
+        print(error)
+        print()
+        print(
+            "Injury-related plan changes require review by a "
+            "qualified club coach or healthcare professional."
+        )
+        print()
+        print("No revised plan was generated or saved.")
+        pause()
+
+        return None
 
 
 def delete_recommendation_flow(recommendation):
