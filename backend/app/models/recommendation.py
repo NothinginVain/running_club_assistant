@@ -12,7 +12,6 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     String,
-    Text,
     func,
 )
 from sqlalchemy.dialects.postgresql import JSONB, UUID
@@ -83,10 +82,6 @@ class Recommendation(Base):
         nullable=True,
     )
 
-    feedback_comment: Mapped[str | None] = mapped_column(
-        Text,
-        nullable=True,
-    )
 
     is_favorite: Mapped[bool] = mapped_column(
         Boolean,
@@ -118,6 +113,5 @@ class Recommendation(Base):
     )
 
     
-
 
 
