@@ -103,3 +103,13 @@ def summarize_conversation(input_text: str, instructions: str, prompt_version: s
         )
 
     return structured_output.model_dump()
+
+
+def create_embeddings(texts: list[str]) -> list[list[float]]:
+    response = client.embeddings.create(
+        model="text-embedding-3-small",
+        input=texts,
+    )
+
+    return [item.embedding for item in response.data]
+
