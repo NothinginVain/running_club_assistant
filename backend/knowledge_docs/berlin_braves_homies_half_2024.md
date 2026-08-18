@@ -1,12 +1,15 @@
 ---
 title: Homies Half - Berlin Braves 2024
 document_type: training_plan
+publisher: Berlin Braves
+resource_title: Homies Half 2024
+content_origin: club_training_material
+original_file: images/berlin_braves_homies_half_2024_training_plan.jpg
+content_status: verified_against_supporting_image
 category: half_marathon
 duration_weeks: 12
-source: Berlin Braves training-plan image
-source_file: WhatsApp Image 2026-07-07 at 13.07.54(2).jpeg
 language: en
-keywords: [half marathon, 12-week plan, Berlin Braves, intervals, long run]
+topics: [half_marathon, training_plan, intervals, long_run]
 ---
 
 # Homies Half - Berlin Braves 2024
@@ -49,4 +52,3 @@ One week-6 note prints the last kilometre at “1K pace,” which would be unusu
 ## Safety note
 
 Before recommending this plan, confirm current weekly volume, recent longest run, ability to tolerate two quality days plus a long run, injury status, and recovery capacity. Modify rather than copy the plan when the user’s baseline does not match it.
-

@@ -1,12 +1,13 @@
 ---
 title: Demo Coach and Specialist Contacts
 document_type: contact_directory
-organization: Berlin Braves RAG Demo
+publisher: Running Club Assistant
+content_origin: fictional_demo_content
 content_status: fictional_demo_data
-fictional: true
 language: en
-last_reviewed: 2026-07-24
 topics: [coaches, contacts, routing]
+fictional: true
+last_reviewed: 2026-07-24
 ---
 
 # Demo Coach and Specialist Contacts

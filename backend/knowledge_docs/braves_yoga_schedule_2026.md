@@ -1,10 +1,14 @@
 ---
+title: Berlin Braves Yoga Classes — June to September 2026
 document_type: class_schedule
-organisation: Berlin Braves
+publisher: Berlin Braves
+content_origin: club_workbook
+content_status: time_sensitive_verify_current
+language: en
+topics: [yoga, class_schedule, booking]
+resource_title: Braves x Yoga
 activity: yoga
 location_city: Berlin
-source_title: Braves x Yoga
-source_url: https://docs.google.com/spreadsheets/d/1y7ODMM3isV-TQpuUXkJzZtBAimhFUnbURxX16lIceEo/edit
 source_tabs: [Info, June, July, August, September]
 calendar_year: 2026
 last_extracted: 2026-07-20
@@ -64,4 +68,3 @@ last_extracted: 2026-07-20
 - The year is inferred as 2026 from the live schedule context and weekday/date alignment.
 - Attendance names were excluded because they are personal booking data and are not reusable knowledge-base content.
 - Schedules and availability may change; consult the source sheet for live sign-ups.
-

@@ -94,3 +94,8 @@ frontend/.env.*
 *.tmp
 *.temp
 AGENTS.md
+
+# Private club operational workbooks
+backend/knowledge_docs/sources/berlin_braves_gym_booking_schedule.xlsx
+backend/knowledge_docs/sources/berlin_braves_race_calendar_2026_2027.xlsx
+backend/knowledge_docs/sources/berlin_braves_yoga_schedule_2026.xlsx

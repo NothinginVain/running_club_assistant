@@ -1,10 +1,14 @@
 ---
-document_type: running_training_plan
-organisation: Berlin Braves
-goal_distance: 5 km
+title: Berlin Braves Six-Week 5K Training Plan
+document_type: training_plan
+publisher: Berlin Braves
+content_origin: club_workbook
+content_status: reviewed_markdown_verify_source_details
+language: en
+topics: [5k, training_plan, intervals, threshold]
+original_file: sources/berlin_braves_training_plans.numbers
+target_distance_km: 5
 duration_weeks: 6
-source_file: Trainingspläne Braves(1).numbers
-source_view: workbook preview
 last_extracted: 2026-07-20
 ---
 
@@ -62,4 +66,3 @@ last_extracted: 2026-07-20
 ## Source limitation
 
 The Numbers workbook was available through its rendered preview. The plan above includes the legible training content from that preview; verify fine interval details against the original workbook before prescribing the plan.
-

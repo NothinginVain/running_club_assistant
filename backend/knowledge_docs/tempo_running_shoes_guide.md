@@ -1,17 +1,21 @@
 ---
 title: Tempo Running Shoes — Category Guide and 2026 Selections
 document_type: running_shoe_category_guide
+publisher: RunRepeat
+resource_title: Best Tempo Running Shoes
+content_origin: external_web_guide
+content_status: time_sensitive_verify_current
+language: en
+topics: [running_shoes, tempo_shoes, road_running]
+reference_url: https://runrepeat.com/guides/best-tempo-running-shoes
+author: Jovana Subic
 shoe_category: tempo
 surface: road
-source_name: RunRepeat
-source_url: https://runrepeat.com/guides/best-tempo-running-shoes
-source_author: Jovana Subic
 source_updated: 2026-07-15
 retrieved_at: 2026-07-20
-content_status: sample
 ---
 
-# Tempo Running Shoes
+# Tempo Running Shoes — Category Guide and 2026 Selections
 
 ## Purpose of this document
 
@@ -232,4 +236,3 @@ metrics:
 ## Source note
 
 This is a structured paraphrase and sample derived from RunRepeat's “7 Best Tempo Shoes in 2026.” Measurements, scores, and editorial awards belong to the source and should be refreshed when the source page changes.
-

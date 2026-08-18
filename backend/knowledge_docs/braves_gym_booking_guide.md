@@ -1,10 +1,14 @@
 ---
+title: Berlin Braves Gym Booking Guide
 document_type: facility_guide
-organisation: Berlin Braves
+publisher: Berlin Braves
+content_origin: club_workbook
+content_status: time_sensitive_verify_current
+language: en
+topics: [gym, treadmill, booking, facility_rules]
+resource_title: BB Gym Time Sheet
 activity: gym_and_treadmill_booking
-source_title: BB Gym Time Sheet
-source_url: https://docs.google.com/spreadsheets/d/1waOY5VsX1-FXOihL_KH8VFfU9_sFzGCjlp3r27pT1fQ/edit
-source_period: 2026-02-09 to 2026-08-09
+source_period: "2026-02-09 to 2026-08-09"
 last_extracted: 2026-07-20
 ---
 
@@ -37,4 +41,3 @@ last_extracted: 2026-07-20
 ## Data handling note
 
 Individual member names and historical reservations were intentionally excluded. They are personal, temporary booking data and are unsuitable for long-term RAG ingestion. Use the live source sheet for current availability.
-

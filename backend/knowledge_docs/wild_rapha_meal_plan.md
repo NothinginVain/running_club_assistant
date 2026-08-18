@@ -1,12 +1,16 @@
 ---
 title: Wild Rapha Meal Plan for Runners
 document_type: nutrition_guide
-category: running_nutrition
-source: Wild Rapha
-source_file: Meal Plan - Wild Rapha(1).pdf
+publisher: Wild Rapha
+resource_title: Wild Rapha Meal Plan
+content_origin: reference_pdf
+content_status: reviewed_markdown_source_details_unverified
 language: en
-keywords: [runner nutrition, calories, protein, carbohydrates, recovery, meal plan]
+topics: [runner_nutrition, calories, protein, carbohydrates, recovery, meal_plan]
+original_file: sources/wild_rapha_runner_meal_plan.pdf
 medical_review_status: not_reviewed
+safety_scope: general_nutrition_education_not_individual_medical_advice
+category: running_nutrition
 ---
 
 # Wild Rapha Meal Plan for Runners
@@ -85,4 +89,3 @@ Source estimate: about 180 g protein, 320 g carbohydrate, and 100 g fat.
 - Treat calorie and macronutrient figures as examples from the source, not prescriptions.
 - These plans contain animal products and are not suitable for vegetarian users without substitutions.
 - Do not use this document alone for allergies, eating disorders, medical nutrition therapy, pregnancy, or disease-specific advice.
-

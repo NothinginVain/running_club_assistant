@@ -1,9 +1,13 @@
 ---
+title: Braves Race Calendar 2026–2027
 document_type: race_events
-organisation: Braves Running Club
+publisher: Berlin Braves
+content_origin: club_workbook
+content_status: time_sensitive_verify_current
+language: en
+topics: [race_calendar, races, registration]
+resource_title: Braves Race Calendar
 calendar_years: [2026, 2027]
-source_title: Braves Race Calender
-source_url: https://docs.google.com/spreadsheets/d/1j9HcDFlEpcOTsk-lwjMaggkmEp1lXFp6OeyU7s995nE/edit?gid=0
 source_sheet: Overview 2026
 last_extracted: 2026-07-20
 ---
