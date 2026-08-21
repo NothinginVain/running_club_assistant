@@ -6,16 +6,12 @@ import type {
 } from "@/types";
 
 export const recommendationsApi = {
-  generateForUser: (userId: string) =>
-    apiClient.post<RecommendationRead>(`/recommendations/generate/${userId}`),
+  generate: () => apiClient.post<RecommendationRead>("/recommendations/generate"),
 
-  listForUser: (userId: string) =>
-    apiClient.get<RecommendationRead[]>(`/recommendations/user/${userId}`),
+  list: () => apiClient.get<RecommendationRead[]>("/recommendations/"),
 
-  listFavoritesForUser: (userId: string) =>
-    apiClient.get<RecommendationRead[]>(
-      `/recommendations/user/${userId}/favorites`,
-    ),
+  listFavorites: () =>
+    apiClient.get<RecommendationRead[]>("/recommendations/favorites"),
 
   get: (recommendationId: string) =>
     apiClient.get<RecommendationRead>(`/recommendations/${recommendationId}`),

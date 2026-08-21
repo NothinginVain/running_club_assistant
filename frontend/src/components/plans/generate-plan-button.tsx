@@ -10,14 +10,12 @@ import { useGenerateRecommendation } from "@/hooks/use-generate-recommendation";
 import { ApiError } from "@/types/api";
 
 export function GeneratePlanButton({
-  userId,
   label = "Generate my plan",
 }: {
-  userId: string;
   label?: string;
 }) {
   const router = useRouter();
-  const generate = useGenerateRecommendation(userId);
+  const generate = useGenerateRecommendation();
 
   function handleClick() {
     generate.mutate(undefined, {

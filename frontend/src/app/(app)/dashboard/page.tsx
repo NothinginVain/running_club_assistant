@@ -13,10 +13,10 @@ import { useRecommendations } from "@/hooks/use-recommendations";
 import { useLatestSurvey } from "@/hooks/use-survey";
 
 export default function DashboardPage() {
-  const { userId, user, isLoading: isUserLoading } = useCurrentUser();
-  const { data: survey, isLoading: isSurveyLoading } = useLatestSurvey(userId);
+  const { user, isLoading: isUserLoading } = useCurrentUser();
+  const { data: survey, isLoading: isSurveyLoading } = useLatestSurvey();
   const { data: recommendations, isLoading: areRecommendationsLoading } =
-    useRecommendations(userId);
+    useRecommendations();
 
   const isLoading = isUserLoading || isSurveyLoading || areRecommendationsLoading;
 
@@ -55,7 +55,7 @@ export default function DashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button render={<Link href="/survey" />} nativeButton={false}>
+            <Button render={<Link href="/survey/new" />} nativeButton={false}>
               <ClipboardList className="size-4" />
               Start survey
             </Button>
@@ -73,7 +73,7 @@ export default function DashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <GeneratePlanButton userId={userId as string} label="Generate my plan" />
+            <GeneratePlanButton label="Generate my plan" />
           </CardContent>
         </Card>
       )}

@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import { ChatComposer } from "@/components/chat/chat-composer";
 import { ChatMessage } from "@/components/chat/chat-message";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useCurrentUser } from "@/hooks/use-current-user";
 import { chatApi } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
 import { ApiError } from "@/types/api";
@@ -37,15 +36,13 @@ function ThinkingBubble() {
 }
 
 export default function CoachPage() {
-  const { userId } = useCurrentUser();
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
   const hasSeededHistory = useRef(false);
   const scrollAnchorRef = useRef<HTMLDivElement>(null);
 
   const { data: history, isLoading: isHistoryLoading } = useQuery({
-    queryKey: queryKeys.chatHistory(userId ?? "none"),
-    queryFn: () => chatApi.getHistory(userId as string),
-    enabled: Boolean(userId),
+    queryKey: queryKeys.chatHistory,
+    queryFn: () => chatApi.getHistory(),
   });
 
   useEffect(() => {
@@ -60,7 +57,7 @@ export default function CoachPage() {
   }, [messages.length]);
 
   const sendMessage = useMutation({
-    mutationFn: (message: string) => chatApi.sendMessage(userId as string, message),
+    mutationFn: (message: string) => chatApi.sendMessage(message),
   });
 
   function handleSend(message: string) {

@@ -11,7 +11,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ChangePasswordDialog } from "@/components/profile/change-password-dialog";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { usersApi } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
@@ -46,7 +48,7 @@ function toUpdatePayload(values: ProfileFormValues): UserUpdate {
 }
 
 export default function ProfilePage() {
-  const { userId, user, isLoading } = useCurrentUser();
+  const { user, isLoading } = useCurrentUser();
   const queryClient = useQueryClient();
 
   const {
@@ -68,9 +70,9 @@ export default function ProfilePage() {
 
   const mutation = useMutation({
     mutationFn: (values: ProfileFormValues) =>
-      usersApi.update(userId as string, toUpdatePayload(values)),
+      usersApi.updateMe(toUpdatePayload(values)),
     onSuccess: (updatedUser) => {
-      queryClient.setQueryData(queryKeys.user(userId as string), updatedUser);
+      queryClient.setQueryData(queryKeys.currentUser, updatedUser);
       reset(toFormValues(updatedUser));
       toast.success("Profile updated.");
     },
@@ -115,9 +117,15 @@ export default function ProfilePage() {
         className="space-y-4"
         noValidate
       >
-        <div className="space-y-1.5">
-          <Label htmlFor="email">Email</Label>
-          <Input id="email" value={user.email} disabled readOnly />
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="username">Username</Label>
+            <Input id="username" value={user.username} disabled readOnly />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="email">Email</Label>
+            <Input id="email" value={user.email} disabled readOnly />
+          </div>
         </div>
 
         <div className="space-y-1.5">
@@ -182,6 +190,18 @@ export default function ProfilePage() {
           Save changes
         </Button>
       </form>
+
+      <Separator />
+
+      <div className="space-y-3">
+        <div>
+          <h2 className="text-base font-medium">Password</h2>
+          <p className="text-sm text-muted-foreground">
+            Change the password used to log in.
+          </p>
+        </div>
+        <ChangePasswordDialog />
+      </div>
     </div>
   );
 }

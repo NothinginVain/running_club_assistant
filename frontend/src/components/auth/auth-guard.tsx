@@ -7,16 +7,16 @@ import { useEffect, type ReactNode } from "react";
 import { useSession } from "@/components/providers/session-provider";
 
 export function AuthGuard({ children }: { children: ReactNode }) {
-  const { userId, isHydrated } = useSession();
+  const { isAuthenticated, isLoading } = useSession();
   const router = useRouter();
 
   useEffect(() => {
-    if (isHydrated && !userId) {
+    if (!isLoading && !isAuthenticated) {
       router.replace("/login");
     }
-  }, [isHydrated, userId, router]);
+  }, [isLoading, isAuthenticated, router]);
 
-  if (!isHydrated || !userId) {
+  if (isLoading || !isAuthenticated) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="size-6 animate-spin text-muted-foreground" />

@@ -1,12 +1,10 @@
 "use client";
 
 import { RecommendationList } from "@/components/plans/recommendation-list";
-import { useCurrentUser } from "@/hooks/use-current-user";
 import { useFavoriteRecommendations } from "@/hooks/use-recommendations";
 
 export default function FavoritesPage() {
-  const { userId } = useCurrentUser();
-  const { data: recommendations, isLoading, isError } = useFavoriteRecommendations(userId);
+  const { data: recommendations, isLoading, isError } = useFavoriteRecommendations();
 
   return (
     <div className="space-y-6">

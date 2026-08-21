@@ -1,11 +1,11 @@
 "use client";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Footprints, LogOut, Menu, UserRound } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { useSession } from "@/components/providers/session-provider";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { authApi } from "@/lib/api";
 
 import { NAV_ITEMS } from "./nav-items";
 import { NavLink } from "./nav-link";
@@ -34,14 +35,17 @@ function initials(name: string | undefined): string {
 
 export function Header() {
   const { user } = useCurrentUser();
-  const { logout } = useSession();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
-  function handleLogout() {
-    logout();
-    router.replace("/login");
-  }
+  const logoutMutation = useMutation({
+    mutationFn: () => authApi.logout(),
+    onSettled: () => {
+      queryClient.clear();
+      router.replace("/login");
+    },
+  });
 
   return (
     <header className="flex h-14 items-center justify-between border-b bg-background px-4 md:px-6">
@@ -104,7 +108,10 @@ export function Header() {
             Profile
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleLogout} variant="destructive">
+          <DropdownMenuItem
+            onClick={() => logoutMutation.mutate()}
+            variant="destructive"
+          >
             <LogOut className="size-4" />
             Log out
           </DropdownMenuItem>

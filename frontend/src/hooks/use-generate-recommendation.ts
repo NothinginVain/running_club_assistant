@@ -5,14 +5,13 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { recommendationsApi } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
 
-export function useGenerateRecommendation(userId: string | null) {
+export function useGenerateRecommendation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () => recommendationsApi.generateForUser(userId as string),
+    mutationFn: () => recommendationsApi.generate(),
     onSuccess: () => {
-      if (!userId) return;
-      queryClient.invalidateQueries({ queryKey: queryKeys.recommendations(userId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.recommendations });
     },
   });
 }
@@ -23,7 +22,7 @@ export function useReviseRecommendation(recommendationId: string) {
   return useMutation({
     mutationFn: () => recommendationsApi.reviseFromFeedback(recommendationId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["recommendations"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.recommendations });
     },
   });
 }

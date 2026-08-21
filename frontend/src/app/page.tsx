@@ -7,13 +7,13 @@ import { useEffect } from "react";
 import { useSession } from "@/components/providers/session-provider";
 
 export default function RootPage() {
-  const { userId, isHydrated } = useSession();
+  const { isAuthenticated, isLoading } = useSession();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isHydrated) return;
-    router.replace(userId ? "/dashboard" : "/login");
-  }, [isHydrated, userId, router]);
+    if (isLoading) return;
+    router.replace(isAuthenticated ? "/dashboard" : "/login");
+  }, [isLoading, isAuthenticated, router]);
 
   return (
     <div className="flex min-h-screen items-center justify-center">

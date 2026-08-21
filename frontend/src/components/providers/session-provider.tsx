@@ -1,69 +1,48 @@
 "use client";
 
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createContext,
-  useCallback,
   useContext,
+  useEffect,
   useMemo,
-  useSyncExternalStore,
   type ReactNode,
 } from "react";
 
-import { clearStoredUserId, getStoredUserId, setStoredUserId } from "@/lib/session";
-
-const SESSION_CHANGED_EVENT = "running-club-assistant:session-changed";
-
-function subscribe(callback: () => void) {
-  window.addEventListener("storage", callback);
-  window.addEventListener(SESSION_CHANGED_EVENT, callback);
-  return () => {
-    window.removeEventListener("storage", callback);
-    window.removeEventListener(SESSION_CHANGED_EVENT, callback);
-  };
-}
-
-function getSnapshot() {
-  return getStoredUserId();
-}
-
-function getServerSnapshot() {
-  return null;
-}
-
-function noopSubscribe() {
-  return () => {};
-}
+import { authApi } from "@/lib/api";
+import { onUnauthorized } from "@/lib/auth-events";
+import { queryKeys } from "@/lib/query-keys";
+import type { User } from "@/types";
 
 interface SessionContextValue {
-  userId: string | null;
-  isHydrated: boolean;
-  login: (userId: string) => void;
-  logout: () => void;
+  user: User | undefined;
+  isLoading: boolean;
+  isAuthenticated: boolean;
 }
 
 const SessionContext = createContext<SessionContextValue | null>(null);
 
 export function SessionProvider({ children }: { children: ReactNode }) {
-  const userId = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-  const isHydrated = useSyncExternalStore(
-    noopSubscribe,
-    () => true,
-    () => false,
+  const queryClient = useQueryClient();
+
+  const { data: user, isLoading } = useQuery({
+    queryKey: queryKeys.currentUser,
+    queryFn: authApi.me,
+    retry: false,
+    staleTime: 60_000,
+  });
+
+  useEffect(
+    () =>
+      onUnauthorized(() => {
+        queryClient.clear();
+      }),
+    [queryClient],
   );
 
-  const login = useCallback((nextUserId: string) => {
-    setStoredUserId(nextUserId);
-    window.dispatchEvent(new Event(SESSION_CHANGED_EVENT));
-  }, []);
-
-  const logout = useCallback(() => {
-    clearStoredUserId();
-    window.dispatchEvent(new Event(SESSION_CHANGED_EVENT));
-  }, []);
-
   const value = useMemo(
-    () => ({ userId, isHydrated, login, logout }),
-    [userId, isHydrated, login, logout],
+    () => ({ user, isLoading, isAuthenticated: Boolean(user) }),
+    [user, isLoading],
   );
 
   return (

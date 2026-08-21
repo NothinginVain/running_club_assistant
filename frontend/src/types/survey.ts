@@ -54,8 +54,5 @@ export interface SurveyRead {
   answers: RunningPlanSurveyAnswers | Record<string, unknown>;
   created_at: string;
   updated_at: string;
-}
-
-export interface SurveyUpdate {
-  answers?: Partial<RunningPlanSurveyAnswers>;
+  deleted_at: string | null;
 }

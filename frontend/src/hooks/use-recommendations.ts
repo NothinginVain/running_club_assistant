@@ -5,19 +5,17 @@ import { useQuery } from "@tanstack/react-query";
 import { recommendationsApi } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
 
-export function useRecommendations(userId: string | null) {
+export function useRecommendations() {
   return useQuery({
-    queryKey: queryKeys.recommendations(userId ?? "none"),
-    queryFn: () => recommendationsApi.listForUser(userId as string),
-    enabled: Boolean(userId),
+    queryKey: queryKeys.recommendations,
+    queryFn: () => recommendationsApi.list(),
   });
 }
 
-export function useFavoriteRecommendations(userId: string | null) {
+export function useFavoriteRecommendations() {
   return useQuery({
-    queryKey: queryKeys.favoriteRecommendations(userId ?? "none"),
-    queryFn: () => recommendationsApi.listFavoritesForUser(userId as string),
-    enabled: Boolean(userId),
+    queryKey: queryKeys.favoriteRecommendations,
+    queryFn: () => recommendationsApi.listFavorites(),
   });
 }
 

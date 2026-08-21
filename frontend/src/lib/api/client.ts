@@ -1,7 +1,8 @@
+import { emitUnauthorized } from "@/lib/auth-events";
 import { ApiError, type FieldValidationError } from "@/types/api";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:5002";
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5002";
 
 interface RequestOptions {
   method?: "GET" | "POST" | "PATCH" | "DELETE";
@@ -53,6 +54,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   try {
     response = await fetch(`${API_BASE_URL}${path}`, {
       method,
+      credentials: "include",
       headers:
         body !== undefined ? { "Content-Type": "application/json" } : undefined,
       body: body !== undefined ? JSON.stringify(body) : undefined,
@@ -77,6 +79,33 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
 
   if (!response.ok) {
     const detail = payload?.detail;
+
+    if (response.status === 401) {
+      // A 401 from the session-restore check itself just means "not logged
+      // in yet" — a normal, expected state, not a session that just expired
+      // mid-use. Emitting here too would clear query state that a still-
+      // mounted /auth/me query then immediately refetches, 401s again, and
+      // re-emits: an infinite loop.
+      if (path !== "/auth/me") {
+        emitUnauthorized();
+      }
+
+      throw new ApiError({
+        kind: "unauthorized",
+        status: response.status,
+        message: extractMessage(detail, "Your session has expired. Please log in again."),
+        detail,
+      });
+    }
+
+    if (response.status === 403) {
+      throw new ApiError({
+        kind: "forbidden",
+        status: response.status,
+        message: extractMessage(detail, "You don't have access to do that."),
+        detail,
+      });
+    }
 
     if (response.status === 422) {
       throw new ApiError({

@@ -87,10 +87,12 @@ export function SurveyForm({
   defaultValues,
   onSubmit,
   isSubmitting,
+  submitLabel = "Save survey",
 }: {
   defaultValues?: Partial<SurveyAnswersValues>;
   onSubmit: (values: SurveyAnswersValues) => void;
   isSubmitting: boolean;
+  submitLabel?: string;
 }) {
   const [stepIndex, setStepIndex] = useState(0);
   const methods = useForm<SurveyAnswersValues>({
@@ -162,7 +164,7 @@ export function SurveyForm({
             {isLastStep ? (
               <Button type="button" onClick={submitSurvey} disabled={isSubmitting}>
                 {isSubmitting && <Loader2 className="size-4 animate-spin" />}
-                Save survey
+                {submitLabel}
               </Button>
             ) : (
               <Button type="button" onClick={handleNext}>
