@@ -5,6 +5,10 @@ surveys, running recommendations, feedback, coach memory, and club knowledge.
 PostgreSQL with pgvector runs in Docker, while FastAPI runs locally through the
 project virtual environment.
 
+A Next.js frontend lives in [`frontend/`](frontend/) — see
+[`frontend/README.md`](frontend/README.md) for its setup, architecture, and
+notes on the (currently backend-limited) authentication story.
+
 ## Features
 
 - User, survey, and recommendation API routes
@@ -52,6 +56,16 @@ backend/
 ├── .env.example             # safe environment-variable template
 ├── alembic.ini
 └── requirements.txt
+
+frontend/
+├── src/
+│   ├── app/                 # Next.js App Router pages
+│   ├── components/          # UI components (app shell, survey, plans, chat...)
+│   ├── hooks/                # TanStack Query hooks per resource
+│   ├── lib/                  # API client, validation schemas, utilities
+│   └── types/                 # TypeScript types mirroring backend schemas
+├── .env.example
+└── package.json
 ```
 
 ## Getting Started

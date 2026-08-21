@@ -1,0 +1,115 @@
+"use client";
+
+import { Footprints, LogOut, Menu, UserRound } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
+import { useSession } from "@/components/providers/session-provider";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { useCurrentUser } from "@/hooks/use-current-user";
+
+import { NAV_ITEMS } from "./nav-items";
+import { NavLink } from "./nav-link";
+
+function initials(name: string | undefined): string {
+  if (!name) return "?";
+
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
+}
+
+export function Header() {
+  const { user } = useCurrentUser();
+  const { logout } = useSession();
+  const router = useRouter();
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+
+  function handleLogout() {
+    logout();
+    router.replace("/login");
+  }
+
+  return (
+    <header className="flex h-14 items-center justify-between border-b bg-background px-4 md:px-6">
+      <div className="flex items-center gap-2 md:hidden">
+        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+          <SheetTrigger
+            render={
+              <Button variant="ghost" size="icon" aria-label="Open navigation menu" />
+            }
+          >
+            <Menu className="size-5" />
+          </SheetTrigger>
+          <SheetContent side="left" className="w-64">
+            <SheetHeader>
+              <SheetTitle className="flex items-center gap-2 text-sm">
+                <Footprints className="size-4" aria-hidden="true" />
+                Running Club Assistant
+              </SheetTitle>
+            </SheetHeader>
+            <nav className="flex flex-col gap-1 px-3" aria-label="Primary">
+              {NAV_ITEMS.map((item) => (
+                <NavLink
+                  key={item.href}
+                  item={item}
+                  onNavigate={() => setIsSheetOpen(false)}
+                />
+              ))}
+            </nav>
+          </SheetContent>
+        </Sheet>
+        <span className="text-sm font-semibold">Running Club Assistant</span>
+      </div>
+
+      <div className="hidden md:block" />
+
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              variant="ghost"
+              className="flex items-center gap-2 px-2"
+              aria-label="Account menu"
+            />
+          }
+        >
+          <Avatar className="size-7">
+            <AvatarFallback className="text-xs">
+              {initials(user?.full_name)}
+            </AvatarFallback>
+          </Avatar>
+          <span className="hidden text-sm font-medium sm:inline">
+            {user?.full_name ?? "Runner"}
+          </span>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem
+            render={<Link href="/profile" className="flex items-center gap-2" />}
+          >
+            <UserRound className="size-4" />
+            Profile
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleLogout} variant="destructive">
+            <LogOut className="size-4" />
+            Log out
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </header>
+  );
+}
