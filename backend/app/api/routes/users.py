@@ -1,105 +1,31 @@
-from uuid import UUID
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
-from sqlalchemy.orm import  Session
-
-from app.db.session import  get_db
+from app.core.security import get_current_user
+from app.db.session import get_db
 from app.models.user import User
-from app.schemas.user import UserCreate, UserRead, UserUpdate
+from app.schemas.user import UserRead, UserUpdate
 
-router = APIRouter(prefix='/users',tags=['Users'])
-
-def fake_hash_password(password):
-    return 'fakehashed_' + password
-
-@router.post('/', response_model=UserRead, status_code=status.HTTP_201_CREATED)
-def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
-    existing_user = db.scalar(
-        select(User).where(User.email == user_data.email)
-    )
-
-    if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail='Email already registered',
-        )
-
-    user = User(
-        full_name=user_data.full_name,
-        email=user_data.email,
-        password_hash=fake_hash_password(user_data.password),
-        gender=user_data.gender,
-        birth=user_data.birth,
-        height_cm=user_data.height_cm,
-        address=user_data.address,
-        social_media=user_data.social_media,
-        shoe_size=user_data.shoe_size,
-        interests=user_data.interests,
-    )
-
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-
-    return user
+router = APIRouter(prefix='/users', tags=['Users'])
 
 
-@router.get('/', response_model=list[UserRead])
-def get_users(db: Session = Depends(get_db)):
-    return db.scalars(select(User)).all()
+@router.get('/me', response_model=UserRead)
+def read_current_user(current_user: User = Depends(get_current_user)):
+    return current_user
 
 
-@router.get('/{user_id}', response_model=UserRead)
-def get_user(user_id: UUID, db: Session = Depends(get_db)):
-    user = db.get(User, user_id)
-
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail='User not found',
-        )
-
-    return user
-
-
-@router.patch('/{user_id}', response_model=UserRead)
-def update_user(
-    user_id: UUID,
+@router.patch('/me', response_model=UserRead)
+def update_current_user(
     user_data: UserUpdate,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    user = db.get(User, user_id)
-
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail='User not found',
-        )
-
-    # receive the fields to update from the user
     update_data = user_data.model_dump(exclude_unset=True)
 
     for key, value in update_data.items():
-        setattr(user, key, value)
+        setattr(current_user, key, value)
 
     db.commit()
-    db.refresh(user)
+    db.refresh(current_user)
 
-    return user
-
-
-@router.delete('/{user_id}', status_code=status.HTTP_204_NO_CONTENT)
-def delete_user(user_id: UUID, db: Session = Depends(get_db)):
-    user = db.get(User, user_id)
-
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail='User not found',
-        )
-
-    db.delete(user)
-    db.commit()
-
-    return None
+    return current_user

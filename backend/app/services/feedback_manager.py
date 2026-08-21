@@ -19,6 +19,12 @@ load_dotenv()
 BASE_URL = os.getenv('BASE_URL')
 REVISION_MARKER = " — Revised "
 
+# NOTE: `assess_feedback_safety` and `build_revision_title` (pure, no HTTP)
+# are reused by app/api/routes/feedbacks.py and are still live. The
+# `requests`-based helpers and `execute_remaining_plan_revision` below are
+# legacy CLI-only code with no authenticated session — see the note at the
+# top of app/cli.py.
+
 
 HEALTH_UPDATE_QUESTIONS: tuple[str, ...] = (
     "What is your current pain level from 0 to 10?",

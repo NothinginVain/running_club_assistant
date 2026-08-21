@@ -1,9 +1,8 @@
-from uuid import UUID
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.security import get_current_user
 from app.services.coach_context_service import build_coach_context
 from app.services.coach_memory_manager import get_or_create_coach_memory
 from app.client_openai import get_chat_reply, summarize_conversation
@@ -31,21 +30,13 @@ def _user_profile(user: User) -> dict:
     }
 
 
-@router.post('/{user_id}', response_model=ChatbotResponse)
+@router.post('/', response_model=ChatbotResponse)
 def chat_with_coach(
-        user_id: UUID,
         chat_data: ChatbotRequest,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db),
 ):
-    user = db.get(User, user_id)
-
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail='User not found',
-        )
-
-    coach_memory = get_or_create_coach_memory(db, user_id)
+    coach_memory = get_or_create_coach_memory(db, current_user.id)
     chat_memory = coach_memory.summary.get("chat", {})
     conversation_history = chat_memory.get(
         "current_conversation",
@@ -55,7 +46,7 @@ def chat_with_coach(
     knowledge_documents = db.scalars(select(KnowledgeBase)).all()
     coach_context = build_coach_context(
         db,
-        user,
+        current_user,
     )
 
     instructions = get_chatbot_prompt()
@@ -100,20 +91,12 @@ def chat_with_coach(
     return ChatbotResponse(reply=result["reply"])
 
 
-@router.post('/{user_id}/end', response_model=ChatbotEndResponse)
+@router.post('/end', response_model=ChatbotEndResponse)
 def end_chat(
-        user_id: UUID,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db),
 ):
-    user = db.get(User, user_id)
-
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail='User not found',
-        )
-
-    coach_memory = get_or_create_coach_memory(db, user_id)
+    coach_memory = get_or_create_coach_memory(db, current_user.id)
     chat_memory = coach_memory.summary.get("chat", {})
     conversation_history = chat_memory.get(
         "current_conversation",
@@ -130,16 +113,22 @@ def end_chat(
 
     instructions = get_memory_summary_prompt()
     input_text = build_conversation_summary_input(
-        _user_profile(user),
+        _user_profile(current_user),
         coach_memory.summary,
         conversation_history,
     )
 
-    updated_chat_summary = summarize_conversation(
-        input_text,
-        instructions,
-        "simple",
-    )
+    try:
+        updated_chat_summary = summarize_conversation(
+            input_text,
+            instructions,
+            "simple",
+        )
+    except Exception as error:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Your coach couldn't wrap up this session right now. Please try again in a moment.",
+        ) from error
 
     coach_memory.summary = {
         "chat": {
@@ -156,20 +145,12 @@ def end_chat(
     )
 
 
-@router.get('/{user_id}/history', response_model=ChatHistoryResponse)
+@router.get('/history', response_model=ChatHistoryResponse)
 def get_chat_history(
-        user_id: UUID,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db),
 ):
-    user = db.get(User, user_id)
-
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail='User not found',
-        )
-
-    coach_memory = get_or_create_coach_memory(db, user_id)
+    coach_memory = get_or_create_coach_memory(db, current_user.id)
     chat_memory = coach_memory.summary.get("chat", {})
 
     db.commit()

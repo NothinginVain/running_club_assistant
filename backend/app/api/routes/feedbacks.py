@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.client_openai import get_recommendation
+from app.core.security import get_current_user
 from app.db.session import get_db
 from app.models.recommendation import Recommendation
 from app.models.user import User
@@ -33,6 +34,22 @@ router = APIRouter(
 REVISION_PROMPT_VERSION = "remaining"
 
 
+def _get_owned_recommendation(
+        recommendation_id: UUID,
+        current_user: User,
+        db: Session,
+) -> Recommendation:
+    recommendation = db.get(Recommendation, recommendation_id)
+
+    if not recommendation or recommendation.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Recommendation not found",
+        )
+
+    return recommendation
+
+
 @router.post(
     "/{recommendation_id}/feedback",
     response_model=FeedbackRead,
@@ -41,15 +58,10 @@ REVISION_PROMPT_VERSION = "remaining"
 def add_recommendation_feedback(
     recommendation_id: UUID,
     feedback_data: FeedbackCreate,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    recommendation = db.get(Recommendation, recommendation_id)
-
-    if recommendation is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Recommendation not found",
-        )
+    recommendation = _get_owned_recommendation(recommendation_id, current_user, db)
 
     feedback = create_feedback(
         db,
@@ -69,15 +81,10 @@ def add_recommendation_feedback(
 )
 def get_recommendation_feedback(
     recommendation_id: UUID,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    recommendation = db.get(Recommendation, recommendation_id)
-
-    if recommendation is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Recommendation not found",
-        )
+    recommendation = _get_owned_recommendation(recommendation_id, current_user, db)
 
     return get_feedback_by_recommendation_id(
         db,
@@ -92,15 +99,10 @@ def get_recommendation_feedback(
 )
 def revise_recommendation_from_feedback(
     recommendation_id: UUID,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    recommendation = db.get(Recommendation, recommendation_id)
-
-    if recommendation is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Recommendation not found",
-        )
+    recommendation = _get_owned_recommendation(recommendation_id, current_user, db)
 
     feedback_entries = get_feedback_by_recommendation_id(
         db,
@@ -161,8 +163,7 @@ def revise_recommendation_from_feedback(
             },
         )
 
-    user = db.get(User, recommendation.user_id)
-    user_dict = {"height_cm": user.height_cm if user else None}
+    user_dict = {"height_cm": current_user.height_cm}
 
     remaining_plan = build_remaining_plan_context(
         recommendation_dict,

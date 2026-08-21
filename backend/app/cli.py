@@ -1,3 +1,14 @@
+# LEGACY / PRE-AUTHENTICATION CODE.
+#
+# This CLI drives the API over plain `requests` calls with a hardcoded
+# DEFAULT_USER_ID and no session. Now that every route below requires an
+# authenticated cookie session (see app/api/routes/auth.py), none of these
+# calls will succeed anymore (they will get 401s). This was intentionally
+# left as-is rather than refactored to call the service/DB layer directly or
+# to fake a session, per the scope of the authentication work — the Next.js
+# frontend is the supported client going forward. Treat this file as
+# reference/dead code until someone updates it to authenticate properly.
+
 import os
 
 import requests

@@ -108,10 +108,6 @@ SurveyCreate = Annotated[
 ]
 
 
-class SurveyUpdate(BaseModel):
-    answers: dict[str, Any] | None = None
-
-
 class SurveyRead(BaseModel):
     id: UUID
     user_id: UUID
@@ -120,5 +116,6 @@ class SurveyRead(BaseModel):
 
     created_at: datetime
     updated_at: datetime
+    deleted_at: datetime | None = None
 
     model_config = ConfigDict(from_attributes=True)

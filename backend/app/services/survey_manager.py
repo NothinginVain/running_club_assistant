@@ -1,3 +1,7 @@
+# LEGACY / PRE-AUTHENTICATION CODE. Not imported by any API route — only
+# used by app/cli.py, which no longer works against the authenticated API.
+# See the note at the top of app/cli.py.
+
 import os
 
 import requests

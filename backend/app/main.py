@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import users, surveys, recommendations, chatbot, feedbacks
+from app.api.routes import auth, users, surveys, recommendations, chatbot, feedbacks
 
 
 
@@ -20,6 +20,7 @@ app.add_middleware(
 def read_root():
     return {"message": "Running AI app is working"}
 
+app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(surveys.router)
 app.include_router(recommendations.router)

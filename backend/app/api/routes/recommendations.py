@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.security import get_current_user
 from app.db.session import get_db
 from app.models.enums import RecommendationType
 from app.models.user import User
@@ -28,14 +29,31 @@ router = APIRouter(
 GENERATION_PROMPT_VERSION = "medium4"
 
 
+def _get_owned_recommendation(
+        recommendation_id: UUID,
+        current_user: User,
+        db: Session,
+) -> Recommendation:
+    recommendation = db.get(Recommendation, recommendation_id)
+
+    if not recommendation or recommendation.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Recommendation not found",
+        )
+
+    return recommendation
+
+
 @router.post('/', response_model=RecommendationRead, status_code=status.HTTP_201_CREATED)
 def create_recommendation(
         recommendation_data: RecommendationCreate,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db),
 ):
     survey = db.get(Survey, recommendation_data.survey_id)
 
-    if survey is None:
+    if survey is None or survey.user_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail='Survey not found',
@@ -43,7 +61,7 @@ def create_recommendation(
 
     recommendation = Recommendation(
         survey_id=recommendation_data.survey_id,
-        user_id=survey.user_id,
+        user_id=current_user.id,
         recommendation_type=recommendation_data.recommendation_type,
         title=recommendation_data.title,
         content=recommendation_data.content,
@@ -59,25 +77,17 @@ def create_recommendation(
 
 
 @router.post(
-    "/generate/{user_id}",
+    "/generate",
     response_model=RecommendationRead,
     status_code=status.HTTP_201_CREATED,
 )
-def generate_recommendation_for_user(
-        user_id: UUID,
+def generate_recommendation_for_current_user(
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db),
 ):
-    user = db.get(User, user_id)
-
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail='User not found',
-        )
-
     survey = db.scalars(
         select(Survey)
-        .where(Survey.user_id == user_id)
+        .where(Survey.user_id == current_user.id, Survey.deleted_at.is_(None))
         .order_by(Survey.created_at.desc())
         .limit(1)
     ).first()
@@ -95,8 +105,8 @@ def generate_recommendation_for_user(
         )
 
     user_dict = {
-        'full_name': user.full_name,
-        'address': user.address,
+        'full_name': current_user.full_name,
+        'address': current_user.address,
     }
     survey_dict = {
         'answers': survey.answers,
@@ -117,7 +127,7 @@ def generate_recommendation_for_user(
 
     recommendation = Recommendation(
         survey_id=survey.id,
-        user_id=user.id,
+        user_id=current_user.id,
         recommendation_type=survey.survey_type,
         title=ai_recommendation['title'],
         content=ai_recommendation['content'],
@@ -133,43 +143,26 @@ def generate_recommendation_for_user(
 
 
 @router.get('/', response_model=list[RecommendationRead])
-def get_recommendations(db: Session = Depends(get_db)):
-    return db.scalars(select(Recommendation)).all()
-
-
-@router.get('/user/{user_id}', response_model=list[RecommendationRead])
-def get_recommendations_by_user(user_id: UUID, db: Session = Depends(get_db)):
-    user = db.get(User, user_id)
-
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail='User not found',
-        )
-
+def get_recommendations(
+        current_user: User = Depends(get_current_user),
+        db: Session = Depends(get_db),
+):
     return db.scalars(
         select(Recommendation)
-        .join(Survey)
-        .where(Survey.user_id == user_id)
+        .where(Recommendation.user_id == current_user.id)
         .order_by(Recommendation.created_at.desc())
     ).all()
 
 
-@router.get('/user/{user_id}/favorites', response_model=list[RecommendationRead])
-def get_favorite_recommendation_by_user(user_id: UUID, db: Session = Depends(get_db)):
-    user = db.get(User, user_id)
-
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail='User not found',
-        )
-
+@router.get('/favorites', response_model=list[RecommendationRead])
+def get_favorite_recommendations(
+        current_user: User = Depends(get_current_user),
+        db: Session = Depends(get_db),
+):
     return db.scalars(
         select(Recommendation)
-        .join(Survey)
         .where(
-            Survey.user_id == user_id,
+            Recommendation.user_id == current_user.id,
             Recommendation.is_favorite == True,
         )
         .order_by(Recommendation.created_at.desc())
@@ -179,11 +172,12 @@ def get_favorite_recommendation_by_user(user_id: UUID, db: Session = Depends(get
 @router.get('/survey/{survey_id}', response_model=list[RecommendationRead])
 def get_recommendations_by_survey(
         survey_id: UUID,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db),
 ):
     survey = db.get(Survey, survey_id)
 
-    if not survey:
+    if not survey or survey.user_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail='Survey not found',
@@ -197,17 +191,10 @@ def get_recommendations_by_survey(
 @router.get('/{recommendation_id}', response_model=RecommendationRead)
 def get_recommendation(
         recommendation_id: UUID,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db),
 ):
-    recommendation = db.get(Recommendation, recommendation_id)
-
-    if not recommendation:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail='Recommendation not found',
-        )
-
-    return  recommendation
+    return _get_owned_recommendation(recommendation_id, current_user, db)
 
 
 @router.patch(
@@ -217,19 +204,10 @@ def get_recommendation(
 def update_recommendation_rating(
     recommendation_id: UUID,
     rating_data: RecommendationRatingUpdate,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    recommendation = db.get(
-        Recommendation,
-        recommendation_id,
-    )
-
-    if recommendation is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Recommendation not found",
-        )
-
+    recommendation = _get_owned_recommendation(recommendation_id, current_user, db)
     recommendation.feedback_rating = rating_data.feedback_rating
 
     db.commit()
@@ -245,19 +223,10 @@ def update_recommendation_rating(
 def update_recommendation_favorite(
     recommendation_id: UUID,
     favorite_data: RecommendationFavoriteUpdate,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    recommendation = db.get(
-        Recommendation,
-        recommendation_id,
-    )
-
-    if recommendation is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Recommendation not found",
-        )
-
+    recommendation = _get_owned_recommendation(recommendation_id, current_user, db)
     recommendation.is_favorite = favorite_data.is_favorite
 
     db.commit()
@@ -269,15 +238,10 @@ def update_recommendation_favorite(
 @router.delete('/{recommendation_id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_recommendation(
         recommendation_id: UUID,
-        db: Session = Depends(get_db)
+        current_user: User = Depends(get_current_user),
+        db: Session = Depends(get_db),
 ):
-    recommendation = db.get(Recommendation, recommendation_id)
-
-    if not recommendation:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail='Recommendation not found',
-        )
+    recommendation = _get_owned_recommendation(recommendation_id, current_user, db)
 
     db.delete(recommendation)
     db.commit()

@@ -13,6 +13,14 @@ load_dotenv()
 
 BASE_URL = os.getenv('BASE_URL')
 
+# NOTE: `generate_recommendation` (pure, no HTTP) is reused by
+# app/api/routes/recommendations.py and is still live. Everything else in
+# this file below — the `requests`-based helpers and `execute_recommendation`
+# — is legacy CLI-only code that calls the API directly and has no
+# authenticated session, so it will 401 against the now-authenticated
+# routes. Left as-is; see the note at the top of app/cli.py.
+
+
 def get_user(user_id):
     response = requests.get(f'{BASE_URL}/users/{user_id}')
 

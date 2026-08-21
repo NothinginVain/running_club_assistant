@@ -5,20 +5,6 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
-class UserCreate(BaseModel):
-    full_name: str
-    email: EmailStr
-    password: str
-
-    gender: str | None = None
-    birth: date | None = None
-    height_cm: float | None = Field(default=None, gt=0, le=300)
-    address: str | None = None
-    social_media: dict[str, Any] | None = None
-    shoe_size: str | None = None
-    interests: list[str] | None = None
-
-
 class UserUpdate(BaseModel):
     full_name: str | None = None
     gender: str | None = None
@@ -32,6 +18,7 @@ class UserUpdate(BaseModel):
 
 class UserRead(BaseModel):
     id: UUID
+    username: str
     full_name: str
     email: EmailStr
 
