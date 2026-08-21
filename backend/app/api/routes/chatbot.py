@@ -12,7 +12,12 @@ from app.models.knowledge_base import KnowledgeBase
 from app.models.user import User
 from app.prompts.chatbot_input import build_chatbot_input, build_conversation_summary_input
 from app.prompts.chatbot_prompt import get_chatbot_prompt, get_memory_summary_prompt
-from app.schemas.chatbot import ChatbotEndResponse, ChatbotRequest, ChatbotResponse
+from app.schemas.chatbot import (
+    ChatbotEndResponse,
+    ChatbotRequest,
+    ChatbotResponse,
+    ChatHistoryResponse,
+)
 from app.schemas.running_structured_outputs import CoachMemorySummary
 
 router = APIRouter(prefix='/chatbot', tags=['Chatbot'])
@@ -69,7 +74,13 @@ def chat_with_coach(
         ],
     )
 
-    result = get_chat_reply(input_text, instructions, "simple")
+    try:
+        result = get_chat_reply(input_text, instructions, "simple")
+    except Exception as error:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Your coach couldn't respond right now. Please try again in a moment.",
+        ) from error
 
     updated_conversation = conversation_history + [
         {"role": "user", "content": chat_data.message},
@@ -142,4 +153,30 @@ def end_chat(
 
     return ChatbotEndResponse(
         summary=CoachMemorySummary(**coach_memory.summary)
+    )
+
+
+@router.get('/{user_id}/history', response_model=ChatHistoryResponse)
+def get_chat_history(
+        user_id: UUID,
+        db: Session = Depends(get_db),
+):
+    user = db.get(User, user_id)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='User not found',
+        )
+
+    coach_memory = get_or_create_coach_memory(db, user_id)
+    chat_memory = coach_memory.summary.get("chat", {})
+
+    db.commit()
+
+    return ChatHistoryResponse(
+        messages=chat_memory.get("current_conversation", []),
+        current_goal=chat_memory.get("current_goal"),
+        preferences=chat_memory.get("preferences", []),
+        progress=chat_memory.get("progress"),
     )

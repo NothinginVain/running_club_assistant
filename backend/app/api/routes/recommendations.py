@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
+from app.models.enums import RecommendationType
 from app.models.user import User
 from app.models.recommendation import Recommendation
 from app.models.survey import Survey
@@ -14,12 +15,17 @@ from app.schemas.recommendation import (
     RecommendationRatingUpdate,
     RecommendationRead,
 )
+from app.services.recommendation_manager import (
+    generate_recommendation as generate_ai_recommendation,
+)
 
 
 router = APIRouter(
     prefix="/recommendations",
     tags=["Recommendations"],
 )
+
+GENERATION_PROMPT_VERSION = "medium4"
 
 
 @router.post('/', response_model=RecommendationRead, status_code=status.HTTP_201_CREATED)
@@ -42,6 +48,80 @@ def create_recommendation(
         title=recommendation_data.title,
         content=recommendation_data.content,
         explanation=recommendation_data.explanation,
+        survey_snapshot=survey.answers,
+    )
+
+    db.add(recommendation)
+    db.commit()
+    db.refresh(recommendation)
+
+    return recommendation
+
+
+@router.post(
+    "/generate/{user_id}",
+    response_model=RecommendationRead,
+    status_code=status.HTTP_201_CREATED,
+)
+def generate_recommendation_for_user(
+        user_id: UUID,
+        db: Session = Depends(get_db),
+):
+    user = db.get(User, user_id)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='User not found',
+        )
+
+    survey = db.scalars(
+        select(Survey)
+        .where(Survey.user_id == user_id)
+        .order_by(Survey.created_at.desc())
+        .limit(1)
+    ).first()
+
+    if not survey:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Complete the survey before generating a recommendation',
+        )
+
+    if survey.survey_type != RecommendationType.RUNNING_PLAN:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Automatic generation is only available for running-plan surveys',
+        )
+
+    user_dict = {
+        'full_name': user.full_name,
+        'address': user.address,
+    }
+    survey_dict = {
+        'answers': survey.answers,
+        'created_at': survey.created_at,
+    }
+
+    try:
+        ai_recommendation = generate_ai_recommendation(
+            user_dict,
+            survey_dict,
+            GENERATION_PROMPT_VERSION,
+        )
+    except Exception as error:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Your coach couldn't generate a plan right now. Please try again in a moment.",
+        ) from error
+
+    recommendation = Recommendation(
+        survey_id=survey.id,
+        user_id=user.id,
+        recommendation_type=survey.survey_type,
+        title=ai_recommendation['title'],
+        content=ai_recommendation['content'],
+        explanation=ai_recommendation.get('explanation'),
         survey_snapshot=survey.answers,
     )
 
