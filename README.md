@@ -6,12 +6,12 @@ PostgreSQL with pgvector runs in Docker, while FastAPI runs locally through the
 project virtual environment.
 
 A Next.js frontend lives in [`frontend/`](frontend/) — see
-[`frontend/README.md`](frontend/README.md) for its setup, architecture, and
-notes on the (currently backend-limited) authentication story.
+[`frontend/README.md`](frontend/README.md) for its setup and architecture.
 
 ## Features
 
-- User, survey, and recommendation API routes
+- Cookie-based authentication and user-owned API routes
+- Survey history with soft deletion
 - Running-plan and feedback workflows
 - Conversational running-coach endpoint with per-user memory
 - SQLAlchemy database models and sessions
@@ -111,11 +111,9 @@ alembic upgrade head
 alembic current
 ```
 
-The expected migration head is:
-
-```text
-a4f72fbaa05d
-```
+Confirm that Alembic reports the latest migration from this checkout as the
+current head. Migration identifiers change as the project evolves, so the
+repository should not document a fixed revision identifier here.
 
 Run the application:
 
@@ -169,12 +167,11 @@ docker compose stop
 - Layered project structure
 - AI API integration
 - Structured chatbot memory
-- Foundation for semantic retrieval with pgvector
+- Semantic retrieval with LangChain, OpenAI embeddings, and pgvector
 - Handling user feedback and recommendation data
 
 ## Future Improvements
 
-- Add automated tests for API routes and services
-- Add document chunking, embedding ingestion, and similarity retrieval
-- Add authentication for user-specific data
+- Expand automated coverage for AI and retrieval workflows
+- Add production email delivery for password resets
 - Expand recommendation history and analytics

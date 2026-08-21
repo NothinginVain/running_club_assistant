@@ -48,10 +48,15 @@ npx tsc --noEmit  # typecheck
 ```
 src/
   app/
-    login/                  public — pick or create a runner
+    login/                  public — sign in
+    register/               public — create an account
+    forgot-password/        public — request a reset link
+    reset-password/         public — set a new password
     (app)/                  protected route group, wrapped in AuthGuard + AppShell
       dashboard/
-      survey/
+      survey/               survey history
+        new/                create a new survey
+        [id]/               read or delete a survey
       plans/
         [id]/               plan detail: rating, favorite, feedback, regenerate
       favorites/
@@ -59,7 +64,7 @@ src/
       profile/
   components/
     app-shell/               sidebar, mobile drawer nav, header
-    auth/                    AuthGuard (redirects to /login if no session)
+    auth/                    authentication forms and AuthGuard
     providers/                SessionProvider, QueryProvider, AppProviders
     plans/                    RecommendationCard/List, StarRating, FavoriteButton,
                                GeneratePlanButton, RegenerateSection, plan rendering
@@ -74,7 +79,7 @@ src/
                                + one file per resource (users, surveys,
                                recommendations, feedback, chat)
     validation/                zod schemas mirroring backend Pydantic schemas
-    session.ts                 localStorage helpers for the current "session"
+    auth-events.ts             shared unauthorized-session events
     survey-options.ts          label maps for backend enums
     query-keys.ts               centralized TanStack Query keys
   types/                       TypeScript types mirroring backend schemas 1:1
@@ -96,65 +101,32 @@ Types in `src/types/` mirror the backend's Pydantic schemas field-for-field
 a backend schema (e.g. structured `social_media` editing) is intentionally
 left out of the UI rather than faked.
 
-## Authentication — important limitation
+## Authentication
 
-**The backend has no real authentication.** `POST /users/` hashes the
-password with a placeholder (`fakehashed_` + password) and no endpoint ever
-verifies it — there is no login/token endpoint at all. Users are otherwise
-just identified by their database UUID.
+The backend verifies Argon2 password hashes and issues a signed JWT in an
+HTTP-only cookie. The browser sends that cookie automatically because the API
+client uses `credentials: "include"`; authentication tokens are never stored
+in localStorage or exposed to application JavaScript.
 
-The frontend's `/login` page reflects this honestly instead of pretending to
-be secure:
+The public workflow includes registration, login, forgot password, and reset
+password. Authenticated runners can also change their password from their
+profile. `SessionProvider` restores the session through `GET /auth/me`, while
+`AuthGuard` protects application pages. Backend routes derive ownership from
+the authenticated user instead of accepting an arbitrary user ID from the
+browser.
 
-- "Continue" tab: lists existing users (`GET /users/`) and lets you pick one.
-- "Create account" tab: creates a new user (`POST /users/`) with name/email/
-  password (password is sent because the schema requires it, but it is
-  **not** used to authenticate anything).
-- The chosen user's ID is stored in `localStorage` (`lib/session.ts`,
-  `SessionProvider`) as the "current session." Any browser/device that opens
-  the app can pick any existing user — **this is not access control.**
-- `AuthGuard` only checks "is a user ID stored," not "is this a valid,
-  verified session."
+Password-reset email delivery currently uses a local console sender. In local
+development, the reset URL appears in the FastAPI terminal rather than being
+sent to a real inbox.
 
-This is clearly documented so it isn't mistaken for real auth. When the
-backend adds real authentication (password verification + tokens/sessions),
-swap `SessionProvider`'s localStorage-backed `login`/`logout` for real token
-storage and point `apiClient` at the new auth header — the rest of the app
-(pages, hooks, API layer) doesn't need to change since it only depends on
-`useSession()`/`useCurrentUser()`, not on how the session is stored.
+## Backend integration
 
-## Backend changes made for this frontend
-
-The backend was almost entirely usable as-is. Four small, additive changes
-were needed (all in `backend/app/`, no existing behavior changed):
-
-1. **CORS middleware** (`main.py`) — allows `http://localhost:3000`. Without
-   this the browser can't call the API at all.
-2. **`POST /recommendations/generate/{user_id}`** (`api/routes/
-   recommendations.py`) — the AI plan-generation logic
-   (`services/recommendation_manager.generate_recommendation`) previously
-   only ran from `cli.py` via self-issued HTTP calls. This route reuses that
-   same function directly against the DB session so the frontend has a real
-   HTTP endpoint to trigger generation from a user's latest survey.
-3. **`POST /recommendations/{id}/revise`** (`api/routes/feedbacks.py`) —
-   same situation for the feedback-driven revision flow
-   (`services/feedback_manager.execute_remaining_plan_revision`), including
-   the existing safety gate (`needs_health_update` / `requires_coach_review`
-   decisions), now surfaced as a structured `409` response instead of only
-   working from the CLI.
-4. **`GET /chatbot/{user_id}/history`** (`api/routes/chatbot.py`) — the
-   coach's conversation history already lived in `coach_memory` but had no
-   read endpoint, so a page refresh would silently lose the visible chat.
-   This exposes it read-only so the Coach page can hydrate on load.
-
-Additionally, the two new AI-calling routes (`generate`, `revise`) and the
-chat route now catch OpenAI failures and return a clean `502` instead of
-letting the exception propagate past FastAPI's error handling — an
-unhandled exception there previously produced a response with no CORS
-headers, which the browser reports as a confusing "blocked by CORS policy"
-error instead of a real error message.
-
-No other backend files, models, or existing routes were changed.
+The frontend uses authenticated, current-user endpoints for profiles,
+surveys, recommendations, feedback, and coach chat. FastAPI validates the JWT
+cookie and checks resource ownership before returning or changing user data.
+AI generation and revision failures are returned as structured API errors;
+the revision safety gate can request more health information or pause a plan
+for coach review.
 
 ## Notable design decisions
 
@@ -165,10 +137,9 @@ No other backend files, models, or existing routes were changed.
   combine "none" with other options, etc.). Those constraints are
   re-implemented client-side in `lib/validation/survey.ts` with a Zod
   `superRefine`, matching the backend's Pydantic `model_validator`.
-- **Editing an existing survey uses `PATCH /surveys/{id}`** (in place)
-  rather than always creating a new survey row, since the backend supports
-  updates and a user only ever has one "current" survey in the product's
-  mental model.
+- **Surveys are historical records.** Runners create a new survey instead of
+  editing an earlier one in place. The history page shows prior surveys, and
+  deletion is soft so existing recommendations keep their source snapshot.
 - **Regenerating from feedback** surfaces the backend's safety gate exactly:
   a `needs_health_update` response opens a dialog with the backend-provided
   questions (compiled into one feedback entry on submit, same shape the CLI
@@ -177,19 +148,14 @@ No other backend files, models, or existing routes were changed.
 - **RAG/knowledge-base internals are not exposed.** The chat UI only ever
   shows `reply` text; embeddings, retrieved chunks, and Langfuse are
   entirely backend-internal.
-- **Favorites are a real page**, not just a client-side filter, since the
-  backend has a dedicated `GET /recommendations/user/{id}/favorites`
-  endpoint.
+- **Favorites are a real page**, backed by the authenticated recommendations
+  endpoint rather than a client-side-only filter.
 
 ## Known gaps / things a backend engineer should know
 
 - Shoe recommendations (`RecommendationType.SHOE_RECOMMENDATION`) are
   defined in the survey schema but have no prompt/service implementation on
   the backend, so the frontend only builds the running-plan survey flow.
-- `prompts/running_plan_input.py` reads `user.get("age")`, but no `age`
-  field exists anywhere in the `User` model/schema (only `birth`) — this is
-  a pre-existing backend quirk, left untouched; it just means `age` is
-  always `None` in the AI prompt today.
 - `social_media` (`dict[str, Any]` on `User`) has no structured UI — there's
   no reasonable generic editor for an arbitrary JSON blob, so it's left
   out of the Profile form rather than faked.
