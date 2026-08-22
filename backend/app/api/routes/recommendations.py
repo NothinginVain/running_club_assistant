@@ -19,6 +19,10 @@ from app.schemas.recommendation import (
 from app.services.recommendation_manager import (
     generate_recommendation as generate_ai_recommendation,
 )
+from app.services.recommendation_title_service import (
+    build_initial_plan_title,
+    get_next_plan_number,
+)
 
 
 router = APIRouter(
@@ -125,11 +129,17 @@ def generate_recommendation_for_current_user(
             detail="Your coach couldn't generate a plan right now. Please try again in a moment.",
         ) from error
 
+    plan_number = get_next_plan_number(db, current_user.id)
+    plan_title = build_initial_plan_title(
+        survey.answers["goal"],
+        plan_number,
+    )
+
     recommendation = Recommendation(
         survey_id=survey.id,
         user_id=current_user.id,
         recommendation_type=survey.survey_type,
-        title=ai_recommendation['title'],
+        title=plan_title,
         content=ai_recommendation['content'],
         explanation=ai_recommendation.get('explanation'),
         survey_snapshot=survey.answers,

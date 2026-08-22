@@ -12,15 +12,15 @@ from app.prompts.feedback_safety_prompt import get_feedback_safety_prompt
 from app.prompts.feedback_safety_input import build_feedback_safety_input
 from app.services.plan_revision_service import build_remaining_plan_context
 from app.services.recommendation_manager import get_user, save_recommendation
+from app.services.recommendation_title_service import build_revision_title
 from app.services.running_plan_service import synchronize_weekly_distances
 
 load_dotenv()
 
 BASE_URL = os.getenv('BASE_URL')
-REVISION_MARKER = " — Revised "
 
-# NOTE: `assess_feedback_safety` and `build_revision_title` (pure, no HTTP)
-# are reused by app/api/routes/feedbacks.py and are still live. The
+# NOTE: `assess_feedback_safety` is reused by
+# app/api/routes/feedbacks.py and is still live. The
 # `requests`-based helpers and `execute_remaining_plan_revision` below are
 # legacy CLI-only code with no authenticated session — see the note at the
 # top of app/cli.py.
@@ -59,18 +59,6 @@ class HealthUpdateRequiredError(Exception):
 
 class CoachReviewRequiredError(Exception):
     pass
-
-
-def build_revision_title(title: str) -> str:
-    base_title, marker, revision_value = title.rpartition(
-        REVISION_MARKER
-    )
-
-    if marker and revision_value.isdigit():
-        revision_number = int(revision_value) + 1
-        return f"{base_title}{REVISION_MARKER}{revision_number}"
-
-    return f"{title}{REVISION_MARKER}1"
 
 
 def create_feedback_entry(recommendation_id, feedback_text):

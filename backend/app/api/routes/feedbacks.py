@@ -16,13 +16,13 @@ from app.schemas.recommendation import RecommendationRead
 from app.services.feedback_manager import (
     HEALTH_UPDATE_QUESTIONS,
     assess_feedback_safety,
-    build_revision_title,
 )
 from app.services.feedback_service import (
     create_feedback,
     get_feedback_by_recommendation_id,
 )
 from app.services.plan_revision_service import build_remaining_plan_context
+from app.services.recommendation_title_service import build_revision_title
 from app.services.running_plan_service import synchronize_weekly_distances
 
 
