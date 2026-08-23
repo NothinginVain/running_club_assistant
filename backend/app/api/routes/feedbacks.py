@@ -168,6 +168,7 @@ def revise_recommendation_from_feedback(
     remaining_plan = build_remaining_plan_context(
         recommendation_dict,
         date.today(),
+        requested_start_date=safety_assessment.get("requested_start_date"),
     )
 
     instructions = get_feedback_prompt(REVISION_PROMPT_VERSION)
@@ -190,6 +191,19 @@ def revise_recommendation_from_feedback(
             detail="Your coach couldn't generate an updated plan right now. Please try again in a moment.",
         ) from error
     revised = synchronize_weekly_distances(revised)
+    
+    expected_dates = [
+        day["date"] for day in remaining_plan["remaining_training_days"]
+    ]
+    actual_dates = [
+        day["date"] for day in revised["content"]["training_days"]
+    ]
+
+    if actual_dates != expected_dates:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="The revised plan changed the required schedule dates.",
+        )
 
     new_recommendation = Recommendation(
         survey_id=recommendation.survey_id,

@@ -12,6 +12,7 @@ def build_feedback_safety_input(
         )
 
     survey = recommendation.get("survey_snapshot") or {}
+    weekly_distance = recommendation.get("content", {}).get("weekly_distance") or []
 
     historical_health_snapshot = {
         "current_issue_areas": (
@@ -28,6 +29,11 @@ def build_feedback_safety_input(
         ),
     }
 
+    plan_date_context = {
+        "current_plan_start": weekly_distance[0]["start_date"] if weekly_distance else None,
+        "current_plan_end": weekly_distance[-1]["end_date"] if weekly_distance else None,
+    }
+
     current_feedback = [
         {
             "created_at": entry.get("created_at"),
@@ -40,6 +46,7 @@ def build_feedback_safety_input(
         "historical_health_snapshot": (
             historical_health_snapshot
         ),
+        "plan_date_context": plan_date_context,
         "current_feedback_oldest_to_newest": (
             current_feedback
         ),

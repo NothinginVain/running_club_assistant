@@ -6,8 +6,10 @@ Priority: safety, newest feedback, selected plan, then survey snapshot.
 Rules:
 
 - Return only the remaining period from revision_date onward.
-- Preserve remaining week numbers, dates, and the final plan date unless
-  feedback explicitly requests a schedule change.
+- The dates in REMAINING PLAN are already final. Return every training day
+  and weekly distance entry using exactly the same date, day, start_date, and
+  end_date values as given in REMAINING PLAN — do not shift, invent, or
+  recompute any date, even if feedback mentions a schedule change.
 - Use the selected plan as the baseline; do not rebuild it from scratch.
 - Make only changes requested by feedback or required for safety.
 - Preserve all unrelated content.

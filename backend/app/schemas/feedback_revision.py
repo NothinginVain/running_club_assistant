@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -13,3 +14,6 @@ class FeedbackSafetyAssessment(BaseModel):
         min_length=1,
         max_length=500,
     )
+    requested_start_date: date | None = None
+
+
