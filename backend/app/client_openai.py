@@ -11,7 +11,7 @@ client = OpenAI()
 
 def get_recommendation(input_text: str, instructions: str, prompt_version: str) -> dict[str, Any]:
     response = client.responses.parse(
-        model="gpt-4o-mini",
+        model="gpt-5-mini",
         instructions=instructions,
         input=input_text,
         text_format=RunningPlanOutput,
