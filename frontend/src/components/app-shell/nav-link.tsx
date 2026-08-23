@@ -15,7 +15,13 @@ export function NavLink({
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
-  const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+  // /survey/new is reached only from the "generate new plan" flow (Plans
+  // page), not from the survey history page, so it should keep Plans
+  // highlighted rather than Survey even though the URL starts with /survey.
+  const isSurveyNewRoute = pathname.startsWith("/survey/new");
+  const isActive = isSurveyNewRoute
+    ? item.href === "/plans"
+    : pathname === item.href || pathname.startsWith(`${item.href}/`);
   const Icon = item.icon;
 
   return (

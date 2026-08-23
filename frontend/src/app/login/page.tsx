@@ -34,7 +34,18 @@ function LoginForm() {
   const mutation = useMutation({
     mutationFn: (values: LoginFormValues) => authApi.login(values),
     onSuccess: (user) => {
+      // Set identity first, then drop every other cached query. None of the
+      // other query keys are scoped per-user, so without this a second
+      // account logging in on top of a first (without a full reload in
+      // between) would keep showing the first account's cached
+      // dashboard/plan data until each query's own staleTime expired.
+      // Clearing currentUser too (even transiently) would flash
+      // "unauthenticated" and bounce AuthGuard back to /login, so it's
+      // excluded from the wipe.
       queryClient.setQueryData(queryKeys.currentUser, user);
+      queryClient.removeQueries({
+        predicate: (query) => query.queryKey[0] !== queryKeys.currentUser[0],
+      });
       router.push(searchParams.get("next") || "/dashboard");
     },
   });
