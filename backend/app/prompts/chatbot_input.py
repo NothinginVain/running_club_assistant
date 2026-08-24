@@ -42,6 +42,7 @@ def build_chatbot_input(
 
     Current goal: {chat_memory.get("current_goal")}
     Preferences: {chat_memory.get("preferences")}
+    Topics of interest: {chat_memory.get("topics_of_interest", [])}
     Progress: {chat_memory.get("progress")}
 
     CONVERSATION SO FAR (this session)
@@ -78,6 +79,7 @@ def build_conversation_summary_input(
 
     Current goal: {chat_memory.get("current_goal")}
     Preferences: {chat_memory.get("preferences")}
+    Topics of interest: {chat_memory.get("topics_of_interest", [])}
     Progress: {chat_memory.get("progress")}
 
     FULL CONVERSATION FROM THIS SESSION

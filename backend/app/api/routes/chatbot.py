@@ -158,5 +158,6 @@ def get_chat_history(
         messages=chat_memory.get("current_conversation", []),
         current_goal=chat_memory.get("current_goal"),
         preferences=chat_memory.get("preferences", []),
+        topics_of_interest=chat_memory.get("topics_of_interest", []),
         progress=chat_memory.get("progress"),
     )

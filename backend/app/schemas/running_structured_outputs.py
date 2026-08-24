@@ -61,6 +61,7 @@ class ChatMessage(BaseModel):
 class ChatSummaryOutput(BaseModel):
     current_goal: str | None = None
     preferences: list[str] = Field(default_factory=list)
+    topics_of_interest: list[str] = Field(default_factory=list)
     progress: str | None = None
 
 
