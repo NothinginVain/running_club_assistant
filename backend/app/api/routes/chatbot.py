@@ -1,13 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.security import get_current_user
 from app.services.coach_context_service import build_coach_context
 from app.services.coach_memory_manager import get_or_create_coach_memory
+from app.services.knowledge_retrieval_service import retrieve_knowledge
 from app.client_openai import get_chat_reply, summarize_conversation
 from app.db.session import get_db
-from app.models.knowledge_base import KnowledgeBase
 from app.models.user import User
 from app.prompts.chatbot_input import build_chatbot_input, build_conversation_summary_input
 from app.prompts.chatbot_prompt import get_chatbot_prompt, get_memory_summary_prompt
@@ -43,30 +42,30 @@ def chat_with_coach(
         [],
     )
 
-    knowledge_documents = db.scalars(select(KnowledgeBase)).all()
     coach_context = build_coach_context(
         db,
         current_user,
     )
 
     instructions = get_chatbot_prompt()
-    input_text = build_chatbot_input(
-        chat_data.message,
-        coach_context,
-        coach_memory.summary,
-        conversation_history,
-        [
-            {
-                "title": doc.title,
-                "content": doc.content,
-                "document_type": doc.document_type,
-            }
-            for doc in knowledge_documents
-        ],
-    )
 
     try:
-        result = get_chat_reply(input_text, instructions, "simple")
+        knowledge_chunks = retrieve_knowledge(
+            db,
+            chat_data.message,
+        )
+        input_text = build_chatbot_input(
+            chat_data.message,
+            coach_context,
+            coach_memory.summary,
+            conversation_history,
+            knowledge_chunks,
+        )
+        result = get_chat_reply(
+            input_text,
+            instructions,
+            "simple",
+        )
     except Exception as error:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,

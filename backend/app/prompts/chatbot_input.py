@@ -2,13 +2,17 @@ import json
 from typing import Any
 
 
-def _format_knowledge(knowledge_documents: list[dict[str, Any]]) -> str:
+def _format_knowledge(knowledge_chunks: list[dict[str, Any]]) -> str:
     knowledge_text = "\n\n".join(
-        f"[{doc.get('document_type') or 'doc'}] {doc.get('title')}\n{doc.get('content')}"
-        for doc in knowledge_documents
+        (
+            f"[{chunk.get('document_type') or 'doc'}] "
+            f"{chunk.get('title')}\n"
+            f"{chunk.get('content')}"
+        )
+        for chunk in knowledge_chunks
     )
 
-    return knowledge_text or "No knowledge documents available."
+    return knowledge_text or "No relevant knowledge found."
 
 
 def _format_conversation(conversation_history: list[dict[str, str]]) -> str:
@@ -25,7 +29,7 @@ def build_chatbot_input(
     coach_context: dict[str, Any],
     memory: dict[str, Any],
     conversation_history: list[dict[str, str]],
-    knowledge_documents: list[dict[str, Any]],
+    knowledge_chunks: list[dict[str, Any]],
 ) -> str:
     chat_memory = memory.get("chat", {})
 
@@ -44,15 +48,15 @@ def build_chatbot_input(
 
     {_format_conversation(conversation_history)}
 
-    CLUB KNOWLEDGE DOCUMENTS
+    RETRIEVED KNOWLEDGE EXCERPTS
 
-    {_format_knowledge(knowledge_documents)}
+    {_format_knowledge(knowledge_chunks)}
 
     RUNNER MESSAGE
 
     {message}
 
-    Reply using the live runner background, memory summary, conversation, and knowledge documents above.
+    Reply using the live runner background, memory summary, conversation, and relevant knowledge excerpts above.
     """.strip()
 
 
