@@ -1,5 +1,6 @@
-import { Footprints } from "lucide-react";
 import type { ReactNode } from "react";
+
+import { BravesMark } from "@/components/brand/logo";
 
 export function AuthShell({
   title,
@@ -13,12 +14,17 @@ export function AuthShell({
   footer?: ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4 py-10">
-      <div className="w-full max-w-sm space-y-6">
-        <div className="flex flex-col items-center gap-2 text-center">
-          <Footprints className="size-8" aria-hidden="true" />
-          <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
-          <p className="text-sm text-muted-foreground">{subtitle}</p>
+    <div className="braves-stripes relative flex min-h-screen items-center justify-center overflow-hidden bg-brand-ink px-4 py-10 text-sidebar-foreground">
+      <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-brand-red via-brand-gold to-brand-red" />
+      <div className="w-full max-w-sm space-y-6 rounded-xl bg-card p-8 text-card-foreground shadow-2xl">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <BravesMark className="size-11" />
+          <div>
+            <h1 className="font-display text-xl font-black tracking-tight uppercase">
+              {title}
+            </h1>
+            <p className="text-sm text-muted-foreground">{subtitle}</p>
+          </div>
         </div>
 
         {children}

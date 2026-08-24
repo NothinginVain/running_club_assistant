@@ -14,7 +14,7 @@ export default function SurveyHistoryPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Survey history</h1>
+        <h1 className="font-display text-2xl font-black tracking-tight">Survey history</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Every survey you&apos;ve submitted. Surveys can&apos;t be edited —
           generate a new plan to submit a new one.
@@ -34,7 +34,7 @@ export default function SurveyHistoryPage() {
           </AlertDescription>
         </Alert>
       ) : !surveys || surveys.length === 0 ? (
-        <div className="rounded-lg border border-dashed py-12 text-center">
+        <div className="braves-stripes rounded-lg border border-dashed py-12 text-center">
           <p className="text-sm text-muted-foreground">
             No surveys yet. Generate a plan to create your first one.
           </p>

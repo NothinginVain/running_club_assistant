@@ -81,7 +81,7 @@ export default function SurveyDetailPage({
 
         <div className="mt-3 flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Survey details</h1>
+            <h1 className="font-display text-2xl font-black tracking-tight">Survey details</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               Submitted {formatDate(survey.created_at)}
               {survey.deleted_at && " · Deleted"}

@@ -1,11 +1,12 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Footprints, LogOut, Menu, UserRound } from "lucide-react";
+import { LogOut, Menu, UserRound } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { Logo } from "@/components/brand/logo";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -58,11 +59,13 @@ export function Header() {
           >
             <Menu className="size-5" />
           </SheetTrigger>
-          <SheetContent side="left" className="w-64">
+          <SheetContent
+            side="left"
+            className="w-64 bg-sidebar text-sidebar-foreground [&_[data-slot=sheet-close]]:text-sidebar-foreground"
+          >
             <SheetHeader>
-              <SheetTitle className="flex items-center gap-2 text-sm">
-                <Footprints className="size-4" aria-hidden="true" />
-                Running Club Assistant
+              <SheetTitle className="text-sidebar-foreground">
+                <Logo subtitle={null} />
               </SheetTitle>
             </SheetHeader>
             <nav className="flex flex-col gap-1 px-3" aria-label="Primary">
@@ -76,7 +79,7 @@ export function Header() {
             </nav>
           </SheetContent>
         </Sheet>
-        <span className="text-sm font-semibold">Running Club Assistant</span>
+        <Logo subtitle={null} />
       </div>
 
       <div className="hidden md:block" />

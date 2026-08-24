@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useCoachChat } from "@/components/chat/coach-chat-provider";
 import { GeneratePlanButton } from "@/components/plans/generate-plan-button";
 import { RecommendationCard } from "@/components/plans/recommendation-card";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -13,6 +14,7 @@ import { useRecommendations } from "@/hooks/use-recommendations";
 import { useLatestSurvey } from "@/hooks/use-survey";
 
 export default function DashboardPage() {
+  const { openChat } = useCoachChat();
   const { user, isLoading: isUserLoading } = useCurrentUser();
   const { data: survey, isLoading: isSurveyLoading } = useLatestSurvey();
   const { data: recommendations, isLoading: areRecommendationsLoading } =
@@ -37,7 +39,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">
+        <h1 className="font-display text-2xl font-black tracking-tight">
           Welcome back{user?.full_name ? `, ${user.full_name.split(" ")[0]}` : ""}
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -88,7 +90,7 @@ export default function DashboardPage() {
       )}
 
       <section className="grid gap-3 sm:grid-cols-2">
-        <Link href="/coach">
+        <button type="button" onClick={openChat} className="text-left">
           <Card className="h-full transition-colors hover:border-primary/50">
             <CardHeader className="flex-row items-center gap-3 space-y-0">
               <MessageCircle className="size-5 text-primary" aria-hidden="true" />
@@ -100,7 +102,7 @@ export default function DashboardPage() {
               </div>
             </CardHeader>
           </Card>
-        </Link>
+        </button>
         <Link href="/plans">
           <Card className="h-full transition-colors hover:border-primary/50">
             <CardHeader className="flex-row items-center gap-3 space-y-0">
