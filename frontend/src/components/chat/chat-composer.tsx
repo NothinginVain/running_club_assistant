@@ -9,9 +9,11 @@ import { Textarea } from "@/components/ui/textarea";
 export function ChatComposer({
   onSend,
   disabled,
+  autoFocus,
 }: {
   onSend: (message: string) => void;
   disabled: boolean;
+  autoFocus?: boolean;
 }) {
   const [value, setValue] = useState("");
 
@@ -38,6 +40,7 @@ export function ChatComposer({
         onKeyDown={handleKeyDown}
         placeholder="Ask your coach anything…"
         rows={1}
+        autoFocus={autoFocus}
         className="max-h-40 min-h-10 resize-none"
         aria-label="Message"
       />

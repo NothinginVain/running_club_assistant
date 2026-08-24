@@ -2,7 +2,6 @@ import {
   ClipboardList,
   Heart,
   LayoutDashboard,
-  MessageCircle,
   ScrollText,
   UserRound,
   type LucideIcon,
@@ -19,6 +18,5 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/survey", label: "Survey", icon: ClipboardList },
   { href: "/plans", label: "Plans", icon: ScrollText },
   { href: "/favorites", label: "Favorites", icon: Heart },
-  { href: "/coach", label: "Coach", icon: MessageCircle },
   { href: "/profile", label: "Profile", icon: UserRound },
 ];
