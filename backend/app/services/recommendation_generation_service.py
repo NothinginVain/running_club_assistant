@@ -1,0 +1,138 @@
+from langfuse import observe, propagate_attributes
+
+from app.client_openai import (
+    get_recommendation,
+    get_training_safety_assessment,
+)
+from app.prompts.running_plan_input import (
+    build_running_plan_input,
+    build_training_safety_input,
+)
+from app.prompts.running_plan_prompt import (
+    get_running_plan_prompt,
+)
+from app.prompts.training_safety_prompt import (
+    get_training_safety_prompt,
+)
+from app.services.running_plan_service import (
+    synchronize_weekly_distances,
+)
+
+
+def assess_training_safety(
+    survey,
+    prompt_version="safety1",
+):
+    instructions = get_training_safety_prompt(
+        prompt_version
+    )
+    input_text = build_training_safety_input(
+        survey
+    )
+
+    return get_training_safety_assessment(
+        input_text,
+        instructions,
+        prompt_version,
+    )
+
+
+PLAN_MODE_CLEARANCE = {
+    "walk_only": "walk",
+    "walk_run": "walk_run",
+    "easy_running": "run",
+}
+
+
+def validate_training_safety(
+    survey,
+    assessment,
+):
+    answers = survey.get("answers") or {}
+
+    issue_areas = set(
+        answers.get("current_issue_areas") or []
+    )
+    pain_level = answers.get("current_pain_level")
+    cleared_activities = set(
+        answers.get("medically_cleared_activities") or []
+    )
+    plan_mode = assessment["plan_mode"]
+
+    has_health_concern = (
+        pain_level is None
+        or pain_level > 0
+        or issue_areas != {"none"}
+    )
+
+    if plan_mode == "blocked":
+        return assessment
+
+    if pain_level is None:
+        raise ValueError(
+            "Current pain level is required for an injury-adapted plan."
+        )
+
+    if not has_health_concern:
+        if plan_mode != "normal_running":
+            raise ValueError(
+                "A healthy survey must use normal_running."
+            )
+
+        return assessment
+
+    if plan_mode == "normal_running":
+        raise ValueError(
+            "normal_running cannot be used when pain or an issue is reported."
+        )
+
+    if not cleared_activities or "not_cleared" in cleared_activities:
+        raise ValueError(
+            "An injury-adapted plan requires reported medical clearance."
+        )
+
+    required_clearance = PLAN_MODE_CLEARANCE.get(
+        plan_mode
+    )
+
+    if required_clearance not in cleared_activities:
+        raise ValueError(
+            f"{plan_mode} requires {required_clearance} clearance."
+        )
+
+    if pain_level > 3 and plan_mode != "walk_only":
+        raise ValueError(
+            "Pain above 3 only permits walk_only or blocked."
+        )
+
+    return assessment
+
+
+@observe(name="running_plan_generation")
+def generate_recommendation(
+    user_id,
+    user,
+    survey,
+    prompt_version="medium4",
+):
+    with propagate_attributes(
+        user_id=str(user_id),
+        tags=["running_plan"],
+    ):
+        instructions = get_running_plan_prompt(
+            prompt_version
+        )
+        input_text = build_running_plan_input(
+            user,
+            survey,
+        )
+
+        recommendation = get_recommendation(
+            input_text,
+            instructions,
+            prompt_version,
+        )
+
+        return synchronize_weekly_distances(
+            recommendation
+        )

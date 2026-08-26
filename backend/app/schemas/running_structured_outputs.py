@@ -17,11 +17,25 @@ class SupportBlock(BaseModel):
     details: str
 
 
+class WalkingBlock(BaseModel):
+    type: Literal["walk", "walk_run"]
+    duration_minutes: int = Field(ge=1)
+    intensity_level: Literal[
+        "gentle",
+        "very_easy",
+        "comfortable",
+        "easy",
+        "brisk",
+    ]
+    details: str
+
+
 class TrainingDay(BaseModel):
     week_number: int = Field(ge=1)
     date: str
     day: str
     running: RunningBlock | None = None
+    walking: WalkingBlock | None = None
     strength: SupportBlock | None = None
     mobility: SupportBlock | None = None
     notes: str | None = None

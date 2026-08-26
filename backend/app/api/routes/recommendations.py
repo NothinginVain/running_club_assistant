@@ -16,7 +16,7 @@ from app.schemas.recommendation import (
     RecommendationRatingUpdate,
     RecommendationRead,
 )
-from app.services.recommendation_manager import (
+from app.services.recommendation_generation_service import (
     generate_recommendation as generate_ai_recommendation,
 )
 from app.services.recommendation_title_service import (
@@ -119,6 +119,7 @@ def generate_recommendation_for_current_user(
 
     try:
         ai_recommendation = generate_ai_recommendation(
+            current_user.id,
             user_dict,
             survey_dict,
             GENERATION_PROMPT_VERSION,

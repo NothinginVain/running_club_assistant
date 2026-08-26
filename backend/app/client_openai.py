@@ -3,10 +3,38 @@ from dotenv import load_dotenv
 from langfuse.openai import OpenAI
 from app.schemas.feedback_revision import FeedbackSafetyAssessment
 from app.schemas.running_structured_outputs import RunningPlanOutput, ChatReplyOutput, ChatSummaryOutput
+from app.schemas.training_safety import TrainingSafetyAssessment
 
 load_dotenv()
 
 client = OpenAI()
+
+
+def get_training_safety_assessment(
+    input_text: str,
+    instructions: str,
+    prompt_version: str,
+) -> dict[str, Any]:
+    response = client.responses.parse(
+        model="gpt-5-mini",
+        instructions=instructions,
+        input=input_text,
+        text_format=TrainingSafetyAssessment,
+        metadata={
+            "feature": "training_safety",
+            "environment": "local_backend",
+            "prompt_version": prompt_version,
+        },
+    )
+
+    assessment = response.output_parsed
+
+    if assessment is None:
+        raise ValueError(
+            "OpenAI returned no training safety assessment."
+        )
+
+    return assessment.model_dump()
 
 
 def get_recommendation(input_text: str, instructions: str, prompt_version: str) -> dict[str, Any]:

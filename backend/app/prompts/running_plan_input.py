@@ -1,3 +1,25 @@
+import json
+
+
+def build_training_safety_input(survey):
+    answers = survey.get("answers") or {}
+
+    return json.dumps(
+        {
+            "current_issue_areas": (
+                answers.get("current_issue_areas") or []
+            ),
+            "current_pain_level": answers.get(
+                "current_pain_level"
+            ),
+            "medically_cleared_activities": answers.get(
+                "medically_cleared_activities"
+            ),
+        },
+        ensure_ascii=False,
+    )
+
+
 def build_running_plan_input(user, survey):
     answers = survey['answers']
 
@@ -17,6 +39,10 @@ def build_running_plan_input(user, survey):
     issue_areas = ", ".join(
         answers.get("current_issue_areas", [])
     )
+
+    cleared_activities = ", ".join(
+        answers.get("medically_cleared_activities") or []
+    ) or "not provided"
 
     return f"""
     The following user completed a running plan survey.
@@ -49,7 +75,7 @@ def build_running_plan_input(user, survey):
 
     Current issue areas: {issue_areas}
     Current pain level: {answers.get("current_pain_level")}/10
-    Medical clearance: {answers.get("has_medical_clearance")}
+    Medically cleared activities: {cleared_activities}
 
     Recovery level: {answers.get("recovery_level")}
     Average sleep duration: {answers.get("average_sleep_duration")}

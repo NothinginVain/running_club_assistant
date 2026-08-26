@@ -76,6 +76,13 @@ class IssueAreaOption(str, Enum):
     OTHER = "other"
 
 
+class MedicallyClearedActivity(str, Enum):
+    NOT_CLEARED = "not_cleared"
+    WALK = "walk"
+    WALK_RUN = "walk_run"
+    RUN = "run"
+
+
 class RecoveryLevel(str, Enum):
     POOR = "poor"
     FAIR = "fair"

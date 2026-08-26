@@ -13,6 +13,7 @@ from app.schemas.survey_options import (
     GoalOption,
     IssueAreaOption,
     MainPreference,
+    MedicallyClearedActivity,
     RecoveryLevel,
     SleepDurationOption,
     StressLevel,
@@ -41,7 +42,11 @@ class RunningPlanSurveyAnswers(BaseModel):
     available_equipment: list[EquipmentOption] = Field(min_length=1)
     current_issue_areas: list[IssueAreaOption] = Field(min_length=1)
     current_pain_level: int = Field(ge=0, le=10)
-    has_medical_clearance: bool | None = None
+    medically_cleared_activities: list[MedicallyClearedActivity] | None = Field(
+        default=None,
+        min_length=1,
+        max_length=3,
+    )
     recovery_level: RecoveryLevel
     average_sleep_duration: SleepDurationOption
     stress_level: StressLevel
@@ -81,6 +86,36 @@ class RunningPlanSurveyAnswers(BaseModel):
         ):
             raise ValueError(
                 "current_issue_areas cannot combine 'none' with another issue"
+            )
+
+        has_health_concern = (
+            self.current_pain_level > 0
+            or IssueAreaOption.NONE not in self.current_issue_areas
+        )
+
+        if has_health_concern and self.medically_cleared_activities is None:
+            raise ValueError(
+                "medically_cleared_activities is required when pain or an issue "
+                "is reported"
+            )
+
+        if (
+            self.medically_cleared_activities
+            and MedicallyClearedActivity.NOT_CLEARED
+            in self.medically_cleared_activities
+            and len(self.medically_cleared_activities) > 1
+        ):
+            raise ValueError(
+                "not_cleared cannot be combined with cleared activities"
+            )
+
+        if (
+            self.medically_cleared_activities
+            and len(set(self.medically_cleared_activities))
+            != len(self.medically_cleared_activities)
+        ):
+            raise ValueError(
+                "medically_cleared_activities cannot contain duplicates"
             )
 
         if (
