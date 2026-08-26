@@ -19,6 +19,7 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { authApi } from "@/lib/api";
+import { broadcastSessionChanged } from "@/lib/session-sync";
 
 import { NAV_ITEMS } from "./nav-items";
 import { NavLink } from "./nav-link";
@@ -44,6 +45,7 @@ export function Header() {
     mutationFn: () => authApi.logout(),
     onSettled: () => {
       queryClient.clear();
+      broadcastSessionChanged();
       router.replace("/login");
     },
   });

@@ -12,6 +12,7 @@ import {
 import { authApi } from "@/lib/api";
 import { onUnauthorized } from "@/lib/auth-events";
 import { queryKeys } from "@/lib/query-keys";
+import { onSessionChangedElsewhere } from "@/lib/session-sync";
 import type { User } from "@/types";
 
 interface SessionContextValue {
@@ -36,6 +37,23 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     () =>
       onUnauthorized(() => {
         queryClient.clear();
+      }),
+    [queryClient],
+  );
+
+  useEffect(
+    () =>
+      // Another tab logged in, switched accounts, or logged out. This tab's
+      // cache has no way to know that on its own -- clear it so the
+      // actively-mounted currentUser query (and whatever else is on screen)
+      // refetches against the browser's actual current session.
+      onSessionChangedElsewhere(() => {
+        // invalidateQueries (not clear()) so actively-mounted queries --
+        // currentUser and whatever else is on screen -- refetch against the
+        // browser's actual current cookie. clear() would just blank the
+        // data instead of forcing a refetch, since removing an active
+        // query from the cache doesn't by itself trigger a new fetch.
+        queryClient.invalidateQueries();
       }),
     [queryClient],
   );

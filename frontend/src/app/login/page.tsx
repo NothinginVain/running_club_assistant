@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authApi } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
+import { broadcastSessionChanged } from "@/lib/session-sync";
 import { loginSchema, type LoginFormValues } from "@/lib/validation/auth";
 import { ApiError } from "@/types/api";
 
@@ -46,6 +47,9 @@ function LoginForm() {
       queryClient.removeQueries({
         predicate: (query) => query.queryKey[0] !== queryKeys.currentUser[0],
       });
+      // Tell any other open tabs a session change happened so they don't
+      // keep showing a different account's stale identity/data.
+      broadcastSessionChanged();
       router.push(searchParams.get("next") || "/dashboard");
     },
   });

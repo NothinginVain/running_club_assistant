@@ -128,7 +128,7 @@ export function CoachChatWidget() {
                 variant="outline"
                 size="sm"
                 onClick={() => setIsConfirmingEnd(true)}
-                disabled={isEndingChat || messages.length === 0}
+                disabled={isEndingChat || isSending || messages.length === 0}
               >
                 {isEndingChat ? "Ending…" : "End chat"}
               </Button>
