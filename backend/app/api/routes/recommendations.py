@@ -11,12 +11,12 @@ from app.models.user import User
 from app.models.recommendation import Recommendation
 from app.models.survey import Survey
 from app.schemas.recommendation import (
-    RecommendationCreate,
     RecommendationFavoriteUpdate,
     RecommendationRatingUpdate,
     RecommendationRead,
 )
 from app.services.recommendation_generation_service import (
+    TrainingBlockedError,
     generate_recommendation as generate_ai_recommendation,
 )
 from app.services.recommendation_title_service import (
@@ -45,37 +45,6 @@ def _get_owned_recommendation(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Recommendation not found",
         )
-
-    return recommendation
-
-
-@router.post('/', response_model=RecommendationRead, status_code=status.HTTP_201_CREATED)
-def create_recommendation(
-        recommendation_data: RecommendationCreate,
-        current_user: User = Depends(get_current_user),
-        db: Session = Depends(get_db),
-):
-    survey = db.get(Survey, recommendation_data.survey_id)
-
-    if survey is None or survey.user_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail='Survey not found',
-        )
-
-    recommendation = Recommendation(
-        survey_id=recommendation_data.survey_id,
-        user_id=current_user.id,
-        recommendation_type=recommendation_data.recommendation_type,
-        title=recommendation_data.title,
-        content=recommendation_data.content,
-        explanation=recommendation_data.explanation,
-        survey_snapshot=survey.answers,
-    )
-
-    db.add(recommendation)
-    db.commit()
-    db.refresh(recommendation)
 
     return recommendation
 
@@ -124,6 +93,14 @@ def generate_recommendation_for_current_user(
             survey_dict,
             GENERATION_PROMPT_VERSION,
         )
+    except TrainingBlockedError as error:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={
+                "reason": "training_blocked",
+                "message": error.message,
+            },
+        ) from error
     except Exception as error:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,

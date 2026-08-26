@@ -108,6 +108,12 @@ def validate_training_safety(
     return assessment
 
 
+class TrainingBlockedError(Exception):
+    def __init__(self, message: str):
+        super().__init__(message)
+        self.message = message
+
+
 @observe(name="running_plan_generation")
 def generate_recommendation(
     user_id,
@@ -119,6 +125,12 @@ def generate_recommendation(
         user_id=str(user_id),
         tags=["running_plan"],
     ):
+        safety_assessment = assess_training_safety(survey)
+        safety_assessment = validate_training_safety(survey, safety_assessment)
+
+        if safety_assessment["plan_mode"] == "blocked":
+            raise TrainingBlockedError(safety_assessment["message"])
+
         instructions = get_running_plan_prompt(
             prompt_version
         )

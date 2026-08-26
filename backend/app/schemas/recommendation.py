@@ -7,14 +7,6 @@ from pydantic import BaseModel, ConfigDict, Field
 from app.models.enums import RecommendationType
 
 
-class RecommendationCreate(BaseModel):
-    survey_id: UUID
-    recommendation_type: RecommendationType
-    title: str
-    content: dict[str, Any]
-    explanation: dict[str, Any] | None = None
-
-
 class RecommendationRead(BaseModel):
     id: UUID
     survey_id: UUID
