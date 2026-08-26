@@ -119,7 +119,6 @@ def generate_recommendation(
     user_id,
     user,
     survey,
-    prompt_version="medium4",
 ):
     with propagate_attributes(
         user_id=str(user_id),
@@ -128,21 +127,28 @@ def generate_recommendation(
         safety_assessment = assess_training_safety(survey)
         safety_assessment = validate_training_safety(survey, safety_assessment)
 
-        if safety_assessment["plan_mode"] == "blocked":
-            raise TrainingBlockedError(safety_assessment["message"])
+        plan_mode = safety_assessment["plan_mode"]
 
-        instructions = get_running_plan_prompt(
-            prompt_version
+        if plan_mode == "blocked":
+            raise TrainingBlockedError(
+                safety_assessment["message"]
+            )
+
+        prompt_version, instructions = get_running_plan_prompt(
+            plan_mode
         )
+
         input_text = build_running_plan_input(
             user,
             survey,
+            plan_mode,
         )
 
         recommendation = get_recommendation(
             input_text,
             instructions,
             prompt_version,
+            plan_mode=plan_mode,
         )
 
         return synchronize_weekly_distances(

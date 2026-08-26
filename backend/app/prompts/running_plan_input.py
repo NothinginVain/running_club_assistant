@@ -20,7 +20,7 @@ def build_training_safety_input(survey):
     )
 
 
-def build_running_plan_input(user, survey):
+def build_running_plan_input(user, survey, plan_mode):
     answers = survey['answers']
 
     preferred_days = ", ".join(
@@ -45,6 +45,8 @@ def build_running_plan_input(user, survey):
     ) or "not provided"
 
     return f"""
+    REQUIRED PLAN MODE: {plan_mode}
+
     The following user completed a running plan survey.
 
     USER INFORMATION

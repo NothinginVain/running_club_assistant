@@ -5,8 +5,17 @@ SupportTiming = Literal["before_run", "after_run", "separate", "rest_day"]
 
 class RunningBlock(BaseModel):
     type: str
-    distance_km: float
-    intensity_level: str
+    distance_km: float = Field(gt=0)
+    intensity_level: Literal[
+        "recovery",
+        "very_easy",
+        "easy",
+        "steady",
+        "tempo",
+        "threshold",
+        "interval",
+        "race",
+    ]
     details: str
 
 
@@ -19,6 +28,7 @@ class SupportBlock(BaseModel):
 
 class WalkingBlock(BaseModel):
     type: Literal["walk", "walk_run"]
+    distance_km: float = Field(gt=0)
     duration_minutes: int = Field(ge=1)
     intensity_level: Literal[
         "gentle",

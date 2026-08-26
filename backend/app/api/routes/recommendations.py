@@ -30,8 +30,6 @@ router = APIRouter(
     tags=["Recommendations"],
 )
 
-GENERATION_PROMPT_VERSION = "medium4"
-
 
 def _get_owned_recommendation(
         recommendation_id: UUID,
@@ -91,7 +89,6 @@ def generate_recommendation_for_current_user(
             current_user.id,
             user_dict,
             survey_dict,
-            GENERATION_PROMPT_VERSION,
         )
     except TrainingBlockedError as error:
         raise HTTPException(

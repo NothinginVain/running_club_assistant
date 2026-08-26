@@ -37,17 +37,27 @@ def get_training_safety_assessment(
     return assessment.model_dump()
 
 
-def get_recommendation(input_text: str, instructions: str, prompt_version: str) -> dict[str, Any]:
+def get_recommendation(
+        input_text: str,
+        instructions: str,
+        prompt_version: str,
+        plan_mode: str | None = None,
+) -> dict[str, Any]:
+    metadata = {
+        "feature": "running_plan",
+        "environment": "local_backend",
+        "prompt_version": prompt_version,
+    }
+
+    if plan_mode is not None:
+        metadata["plan_mode"] = plan_mode
+
     response = client.responses.parse(
         model="gpt-5-mini",
         instructions=instructions,
         input=input_text,
         text_format=RunningPlanOutput,
-        metadata={
-            "feature": "running_plan",
-            "environment": "local_backend",
-            "prompt_version": prompt_version,
-        },
+        metadata=metadata,
     )
 
     structured_output = response.output_parsed
