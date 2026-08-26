@@ -38,7 +38,7 @@ export function ChatComposer({
         value={value}
         onChange={(event) => setValue(event.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Ask your coach anything…"
+        placeholder="Ask your assistant anything…"
         rows={1}
         autoFocus={autoFocus}
         className="max-h-40 min-h-10 resize-none"

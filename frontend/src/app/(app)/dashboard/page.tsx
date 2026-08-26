@@ -95,7 +95,7 @@ export default function DashboardPage() {
             <CardHeader className="flex-row items-center gap-3 space-y-0">
               <MessageCircle className="size-5 text-primary" aria-hidden="true" />
               <div>
-                <CardTitle className="text-base">Ask your coach</CardTitle>
+                <CardTitle className="text-base">Ask your assistant</CardTitle>
                 <CardDescription>
                   Get advice, adjust your plan, or ask a question.
                 </CardDescription>

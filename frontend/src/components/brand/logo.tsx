@@ -28,7 +28,7 @@ export function BravesMark({ className }: { className?: string }) {
 export function Logo({
   className,
   markClassName,
-  subtitle = "COACH",
+  subtitle = "ASSISTANT",
 }: {
   className?: string;
   markClassName?: string;
@@ -39,7 +39,7 @@ export function Logo({
       <BravesMark className={cn("size-8 shrink-0", markClassName)} />
       <span className="flex flex-col leading-none">
         <span className="font-display text-base font-black tracking-tight uppercase">
-          Braves
+          Running Club
         </span>
         {subtitle && (
           <span className="text-[10px] font-semibold tracking-[0.2em] text-brand-red uppercase">

@@ -89,7 +89,7 @@ export function CoachChatWidget() {
         type="button"
         onClick={toggleChat}
         aria-expanded={isOpen}
-        aria-label={isOpen ? "Close coach chat" : "Open coach chat"}
+        aria-label={isOpen ? "Close assistant chat" : "Open assistant chat"}
         className={cn(
           "fixed right-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 size-14 rounded-full shadow-lg sm:right-6",
           isOpen && "ring-2 ring-primary ring-offset-2 ring-offset-background",
@@ -108,7 +108,7 @@ export function CoachChatWidget() {
         <div
           ref={panelRef}
           role="dialog"
-          aria-label="Coach chat"
+          aria-label="Assistant chat"
           onKeyDown={handleKeyDown}
           className={cn(
             "fixed inset-x-0 bottom-0 z-40 flex h-[85vh] flex-col rounded-t-2xl border bg-card shadow-2xl",
@@ -119,7 +119,7 @@ export function CoachChatWidget() {
             <div className="flex items-center gap-2">
               <BravesMark className="size-6" />
               <span className="font-display text-sm font-black tracking-tight uppercase">
-                Coach
+                Assistant
               </span>
             </div>
             <div className="flex items-center gap-1">
@@ -137,7 +137,7 @@ export function CoachChatWidget() {
                 variant="ghost"
                 size="icon-sm"
                 onClick={handleClose}
-                aria-label="Close coach chat"
+                aria-label="Close assistant chat"
               >
                 <X className="size-4" />
               </Button>
@@ -153,8 +153,8 @@ export function CoachChatWidget() {
             ) : messages.length === 0 ? (
               <div className="flex h-full items-center justify-center text-center">
                 <p className="max-w-xs text-sm text-muted-foreground">
-                  Say hello to your coach. Ask about pacing, recovery, or how
-                  your plan is going.
+                  Say hello to your assistant. Ask about pacing, recovery, or
+                  how your plan is going.
                 </p>
               </div>
             ) : (
@@ -179,8 +179,8 @@ export function CoachChatWidget() {
           <DialogHeader>
             <DialogTitle>End this chat?</DialogTitle>
             <DialogDescription>
-              Your coach will record and summarize this conversation into
-              your coach memory. This can&apos;t be undone.
+              Your assistant will record and summarize this conversation to
+              remember for next time. This can&apos;t be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

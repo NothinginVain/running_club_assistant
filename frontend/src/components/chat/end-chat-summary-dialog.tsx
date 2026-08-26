@@ -50,8 +50,8 @@ export function EndChatSummaryDialog({
         <DialogHeader>
           <DialogTitle>Session summary</DialogTitle>
           <DialogDescription>
-            This is what your coach remembered from this session. It carries
-            into your next chat.
+            This is what your assistant remembered from this session. It
+            carries into your next chat.
           </DialogDescription>
         </DialogHeader>
 
