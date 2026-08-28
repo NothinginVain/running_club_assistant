@@ -35,8 +35,8 @@ export function RegenerateSection({
   const revise = useReviseRecommendation(recommendationId);
   const [healthUpdate, setHealthUpdate] = useState<{
     open: boolean;
-    questions: string[];
-  }>({ open: false, questions: [] });
+    message?: string;
+  }>({ open: false });
   const [coachReviewMessage, setCoachReviewMessage] = useState<string | null>(null);
 
   function handleGenerate() {
@@ -52,7 +52,7 @@ export function RegenerateSection({
           if (error.detail.reason === "needs_health_update") {
             setHealthUpdate({
               open: true,
-              questions: error.detail.questions ?? [],
+              message: error.detail.message,
             });
             return;
           }
@@ -101,7 +101,7 @@ export function RegenerateSection({
 
       <HealthUpdateDialog
         recommendationId={recommendationId}
-        questions={healthUpdate.questions}
+        message={healthUpdate.message}
         open={healthUpdate.open}
         onOpenChange={(open) => setHealthUpdate((state) => ({ ...state, open }))}
       />

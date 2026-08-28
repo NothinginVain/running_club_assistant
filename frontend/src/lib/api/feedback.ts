@@ -1,5 +1,5 @@
 import { apiClient } from "./client";
-import type { FeedbackCreate, FeedbackRead } from "@/types";
+import type { FeedbackCreate, FeedbackRead, HealthUpdateCreate } from "@/types";
 
 export const feedbackApi = {
   create: (recommendationId: string, data: FeedbackCreate) =>
@@ -11,5 +11,11 @@ export const feedbackApi = {
   listForRecommendation: (recommendationId: string) =>
     apiClient.get<FeedbackRead[]>(
       `/recommendations/${recommendationId}/feedback`,
+    ),
+
+  createHealthUpdate: (recommendationId: string, data: HealthUpdateCreate) =>
+    apiClient.post<FeedbackRead>(
+      `/recommendations/${recommendationId}/health-update`,
+      data,
     ),
 };
