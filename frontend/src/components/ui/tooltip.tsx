@@ -38,11 +38,11 @@ function TooltipContent({
 }: TooltipPrimitive.Popup.Props & { sideOffset?: number }) {
   return (
     <TooltipPrimitive.Portal>
-      <TooltipPrimitive.Positioner sideOffset={sideOffset}>
+      <TooltipPrimitive.Positioner className="z-[60]" sideOffset={sideOffset}>
         <TooltipPrimitive.Popup
           data-slot="tooltip-content"
           className={cn(
-            "z-50 max-w-64 rounded-md bg-foreground px-2.5 py-1.5 text-xs text-balance text-background data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+            "max-w-64 rounded-md bg-foreground px-2.5 py-1.5 text-xs text-balance text-background data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
             className
           )}
           {...props}
