@@ -138,6 +138,7 @@ export function HealthUpdateDialog({
         onError: (error) => {
           toast.error(
             error instanceof ApiError ? error.message : "Couldn't save your health update.",
+            { duration: 10000 },
           );
         },
       },
@@ -154,6 +155,13 @@ export function HealthUpdateDialog({
               "For your safety, we need current details before your coach can revise this plan."}
           </DialogDescription>
         </DialogHeader>
+
+        <p className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
+          If you report any warning symptom, say walking increases symptoms,
+          aren&apos;t cleared by a professional, or have other restrictions,
+          automatic revision will pause for a coach to review instead of
+          generating a new plan right away.
+        </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-2">
@@ -175,6 +183,10 @@ export function HealthUpdateDialog({
 
           <div className="space-y-2">
             <Label>Any warning symptoms?</Label>
+            <p className="text-xs text-muted-foreground">
+              Choosing anything other than &quot;None of these&quot; sends this
+              to a coach for review.
+            </p>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {WARNING_SYMPTOM_OPTIONS.map((option) => {
                 const checkboxId = `warning-symptom-${option.value}`;
@@ -206,6 +218,10 @@ export function HealthUpdateDialog({
             <Label htmlFor="health-update-walking-response">
               Does walking increase your symptoms?
             </Label>
+            <p className="text-xs text-muted-foreground">
+              &quot;Yes&quot; sends this to a coach for review instead of an
+              automatic revision.
+            </p>
             <Select
               value={walkingSymptomResponse}
               onValueChange={(value) =>
@@ -235,6 +251,11 @@ export function HealthUpdateDialog({
             <Label htmlFor="health-update-clearance-status">
               Professional assessment status
             </Label>
+            <p className="text-xs text-muted-foreground">
+              &quot;Assessed, not cleared&quot; sends this to a coach for
+              review. &quot;Not assessed&quot; only allows the most
+              conservative walk-only plan, and only with no pain or symptoms.
+            </p>
             <Select
               value={professionalClearanceStatus}
               onValueChange={(value) => {
@@ -292,15 +313,21 @@ export function HealthUpdateDialog({
             </div>
           )}
 
-          <div className="flex items-center justify-between rounded-md border px-3 py-2.5">
-            <Label htmlFor="health-update-additional-restrictions" className="text-sm">
-              Any other restrictions not covered above?
-            </Label>
-            <Switch
-              id="health-update-additional-restrictions"
-              checked={hasAdditionalRestrictions}
-              onCheckedChange={(state) => setHasAdditionalRestrictions(state === true)}
-            />
+          <div className="space-y-1.5 rounded-md border px-3 py-2.5">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="health-update-additional-restrictions" className="text-sm">
+                Any other restrictions not covered above?
+              </Label>
+              <Switch
+                id="health-update-additional-restrictions"
+                checked={hasAdditionalRestrictions}
+                onCheckedChange={(state) => setHasAdditionalRestrictions(state === true)}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Turning this on sends this to a coach for review instead of an
+              automatic revision.
+            </p>
           </div>
 
           <DialogFooter>

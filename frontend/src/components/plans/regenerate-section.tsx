@@ -65,6 +65,7 @@ export function RegenerateSection({
           error instanceof ApiError
             ? error.message
             : "Couldn't generate an updated plan.",
+          { duration: 10000 },
         );
       },
     });

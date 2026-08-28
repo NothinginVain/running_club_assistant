@@ -12,7 +12,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
     <QueryProvider>
       <SessionProvider>
         {children}
-        <Toaster position="top-right" />
+        <Toaster position="top-right" duration={6000} />
       </SessionProvider>
     </QueryProvider>
   );
