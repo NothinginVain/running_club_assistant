@@ -9,7 +9,7 @@ from app.models.knowledge_chunk import KnowledgeChunk
 
 
 DEFAULT_RESULTS_LIMIT = 5
-
+MAX_COSINE_DISTANCE = 0.65
 
 def retrieve_knowledge(
         db: Session,
@@ -40,6 +40,7 @@ def retrieve_knowledge(
             KnowledgeBase,
             KnowledgeChunk.knowledge_base_id == KnowledgeBase.id,
         )
+        .where(distance <= MAX_COSINE_DISTANCE)
         .order_by(distance)
         .limit(limit)
     ).all()
@@ -50,6 +51,9 @@ def retrieve_knowledge(
             "document_id": str(document.id),
             "title": document.title,
             "source": document.source,
+            "content_status": (
+                document.metadata_ or {}
+            ).get("content_status"),
             "document_type": document.document_type,
             "content": chunk.content,
             "metadata": chunk.metadata_ or {},

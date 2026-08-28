@@ -2,17 +2,39 @@ import json
 from typing import Any
 
 
-def _format_knowledge(knowledge_chunks: list[dict[str, Any]]) -> str:
-    knowledge_text = "\n\n".join(
-        (
-            f"[{chunk.get('document_type') or 'doc'}] "
-            f"{chunk.get('title')}\n"
-            f"{chunk.get('content')}"
-        )
-        for chunk in knowledge_chunks
-    )
+def _format_knowledge(
+    knowledge_chunks: list[dict[str, Any]],
+) -> str:
+    formatted_chunks = []
 
-    return knowledge_text or "No relevant knowledge found."
+    for chunk in knowledge_chunks:
+        lines = [
+            (
+                f"[{chunk.get('document_type') or 'doc'}] "
+                f"{chunk.get('title')}"
+            )
+        ]
+
+        if chunk.get("source"):
+            lines.append(
+                f"Source: {chunk['source']}"
+            )
+
+        if chunk.get("content_status"):
+            lines.append(
+                f"Status: {chunk['content_status']}"
+            )
+
+        lines.append(chunk.get("content", ""))
+
+        formatted_chunks.append(
+            "\n".join(lines)
+        )
+
+    return (
+        "\n\n".join(formatted_chunks)
+        or "No relevant knowledge found."
+    )
 
 
 def _format_conversation(conversation_history: list[dict[str, str]]) -> str:
