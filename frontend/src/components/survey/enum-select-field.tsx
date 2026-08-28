@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 
 import {
@@ -10,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { FieldInfo } from "@/components/survey/field-info";
 import type { SurveyAnswersValues } from "@/lib/validation/survey";
 import type { SelectOption } from "@/lib/survey-options";
 
@@ -17,6 +19,7 @@ interface EnumSelectFieldProps {
   name: keyof SurveyAnswersValues;
   label: string;
   description?: string;
+  info?: ReactNode;
   options: SelectOption[];
   numeric?: boolean;
   placeholder?: string;
@@ -26,6 +29,7 @@ export function EnumSelectField({
   name,
   label,
   description,
+  info,
   options,
   numeric = false,
   placeholder = "Select an option",
@@ -35,7 +39,10 @@ export function EnumSelectField({
 
   return (
     <div className="space-y-1.5">
-      <Label htmlFor={name}>{label}</Label>
+      <div className="flex items-center gap-1.5">
+        <Label htmlFor={name}>{label}</Label>
+        {info && <FieldInfo>{info}</FieldInfo>}
+      </div>
       {description && (
         <p className="text-xs text-muted-foreground">{description}</p>
       )}

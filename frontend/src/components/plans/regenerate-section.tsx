@@ -105,6 +105,7 @@ export function RegenerateSection({
         message={healthUpdate.message}
         open={healthUpdate.open}
         onOpenChange={(open) => setHealthUpdate((state) => ({ ...state, open }))}
+        onSaved={handleGenerate}
       />
     </div>
   );

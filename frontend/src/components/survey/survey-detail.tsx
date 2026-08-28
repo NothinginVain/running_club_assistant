@@ -88,7 +88,11 @@ export function SurveyDetail({ survey }: { survey: SurveyRead }) {
         />
         <Field
           label="Long-run day"
-          value={labelFor(WEEKDAY_OPTIONS, a.preferred_long_run_day)}
+          value={
+            a.preferred_long_run_day
+              ? labelFor(WEEKDAY_OPTIONS, a.preferred_long_run_day)
+              : "No preference"
+          }
         />
         <Field label="Max session" value={`${a.max_session_minutes} minutes`} />
         <Field label="Terrain" value={labelFor(TERRAIN_OPTIONS, a.preferred_terrain)} />

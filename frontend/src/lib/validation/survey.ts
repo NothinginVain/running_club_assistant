@@ -48,7 +48,7 @@ export const surveyAnswersSchema = z
     preferred_training_days: z
       .array(z.enum(enumValues(Weekday)))
       .min(1, "Choose at least one training day"),
-    preferred_long_run_day: z.enum(enumValues(Weekday)),
+    preferred_long_run_day: z.enum(enumValues(Weekday)).nullable(),
     max_session_minutes: z.union([
       z.literal(30),
       z.literal(45),
@@ -97,7 +97,10 @@ export const surveyAnswersSchema = z
       });
     }
 
-    if (!values.preferred_training_days.includes(values.preferred_long_run_day)) {
+    if (
+      values.preferred_long_run_day !== null &&
+      !values.preferred_training_days.includes(values.preferred_long_run_day)
+    ) {
       ctx.addIssue({
         code: "custom",
         path: ["preferred_long_run_day"],

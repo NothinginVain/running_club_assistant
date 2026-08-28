@@ -1,9 +1,11 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { FieldInfo } from "@/components/survey/field-info";
 import type { SurveyAnswersValues } from "@/lib/validation/survey";
 import type { SelectOption } from "@/lib/survey-options";
 
@@ -11,6 +13,7 @@ interface CheckboxGroupFieldProps {
   name: keyof SurveyAnswersValues;
   label: string;
   description?: string;
+  info?: ReactNode;
   options: SelectOption[];
   exclusiveValue?: string;
 }
@@ -19,6 +22,7 @@ export function CheckboxGroupField({
   name,
   label,
   description,
+  info,
   options,
   exclusiveValue,
 }: CheckboxGroupFieldProps) {
@@ -27,7 +31,10 @@ export function CheckboxGroupField({
 
   return (
     <div className="space-y-2">
-      <Label>{label}</Label>
+      <div className="flex items-center gap-1.5">
+        <Label>{label}</Label>
+        {info && <FieldInfo>{info}</FieldInfo>}
+      </div>
       {description && (
         <p className="text-xs text-muted-foreground">{description}</p>
       )}

@@ -27,7 +27,7 @@ export interface RunningPlanSurveyAnswers {
   runs_per_week: 1 | 2 | 3 | 4 | 5 | 6 | 7;
   longest_recent_run_km: number;
   preferred_training_days: Weekday[];
-  preferred_long_run_day: Weekday;
+  preferred_long_run_day: Weekday | null;
   max_session_minutes: 30 | 45 | 60 | 75 | 90 | 120;
   preferred_terrain: TerrainOption;
   available_equipment: EquipmentOption[];

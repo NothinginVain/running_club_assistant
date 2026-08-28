@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
+import { FieldInfo } from "@/components/survey/field-info";
 import { useCreateHealthUpdate } from "@/hooks/use-feedback";
 import { MEDICALLY_CLEARED_ACTIVITY_OPTIONS } from "@/lib/survey-options";
 import { ApiError } from "@/types/api";
@@ -35,7 +36,7 @@ import type {
 } from "@/types";
 
 const WARNING_SYMPTOM_OPTIONS: { value: WarningSymptom; label: string }[] = [
-  { value: "none", label: "None of these" },
+  { value: "none", label: "None" },
   { value: "swelling", label: "Swelling" },
   { value: "restricted_movement", label: "Restricted movement" },
   { value: "abnormal_walking", label: "Abnormal walking" },
@@ -79,11 +80,13 @@ export function HealthUpdateDialog({
   message,
   open,
   onOpenChange,
+  onSaved,
 }: {
   recommendationId: string;
   message?: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSaved?: () => void;
 }) {
   const [painLevel, setPainLevel] = useState(0);
   const [warningSymptoms, setWarningSymptoms] = useState<WarningSymptom[]>([]);
@@ -129,11 +132,10 @@ export function HealthUpdateDialog({
       },
       {
         onSuccess: () => {
-          toast.success(
-            "Health update saved. Generate an updated plan again when you're ready.",
-          );
+          toast.success("Health update saved. Requesting your updated plan…");
           onOpenChange(false);
           resetForm();
+          onSaved?.();
         },
         onError: (error) => {
           toast.error(
@@ -166,7 +168,14 @@ export function HealthUpdateDialog({
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="health-update-pain-level">Current pain level</Label>
+              <div className="flex items-center gap-1.5">
+                <Label htmlFor="health-update-pain-level">Current pain level</Label>
+                <FieldInfo>
+                  0 means no pain at all. Higher levels limit which plan
+                  modes are possible — above 3 only allows the most
+                  conservative walk-only mode, if cleared.
+                </FieldInfo>
+              </div>
               <span className="text-sm text-muted-foreground">{painLevel}/10</span>
             </div>
             <Slider
@@ -182,11 +191,13 @@ export function HealthUpdateDialog({
           </div>
 
           <div className="space-y-2">
-            <Label>Any warning symptoms?</Label>
-            <p className="text-xs text-muted-foreground">
-              Choosing anything other than &quot;None of these&quot; sends this
-              to a coach for review.
-            </p>
+            <div className="flex items-center gap-1.5">
+              <Label>Any warning symptoms?</Label>
+              <FieldInfo>
+                Choosing anything other than &quot;None&quot; sends this to a
+                coach for review instead of an automatic revision.
+              </FieldInfo>
+            </div>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {WARNING_SYMPTOM_OPTIONS.map((option) => {
                 const checkboxId = `warning-symptom-${option.value}`;
@@ -215,13 +226,15 @@ export function HealthUpdateDialog({
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="health-update-walking-response">
-              Does walking increase your symptoms?
-            </Label>
-            <p className="text-xs text-muted-foreground">
-              &quot;Yes&quot; sends this to a coach for review instead of an
-              automatic revision.
-            </p>
+            <div className="flex items-center gap-1.5">
+              <Label htmlFor="health-update-walking-response">
+                Does walking increase your symptoms?
+              </Label>
+              <FieldInfo>
+                &quot;Yes&quot; sends this to a coach for review instead of an
+                automatic revision.
+              </FieldInfo>
+            </div>
             <Select
               value={walkingSymptomResponse}
               onValueChange={(value) =>
@@ -248,14 +261,18 @@ export function HealthUpdateDialog({
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="health-update-clearance-status">
-              Professional assessment status
-            </Label>
-            <p className="text-xs text-muted-foreground">
-              &quot;Assessed, not cleared&quot; sends this to a coach for
-              review. &quot;Not assessed&quot; only allows the most
-              conservative walk-only plan, and only with no pain or symptoms.
-            </p>
+            <div className="flex items-center gap-1.5">
+              <Label htmlFor="health-update-clearance-status">
+                Professional assessment status
+              </Label>
+              <FieldInfo>
+                &quot;Assessed, not cleared&quot; sends this to a coach for
+                review. &quot;Not assessed&quot; only allows the most
+                conservative walk-only plan, and only with no pain or
+                symptoms. &quot;Assessed and cleared&quot; unlocks walk-run
+                or easy-running modes if you select them below.
+              </FieldInfo>
+            </div>
             <Select
               value={professionalClearanceStatus}
               onValueChange={(value) => {
@@ -284,7 +301,15 @@ export function HealthUpdateDialog({
 
           {isCleared && (
             <div className="space-y-2">
-              <Label>Which activities were you cleared for?</Label>
+              <div className="flex items-center gap-1.5">
+                <Label>Which activities were you cleared for?</Label>
+                <FieldInfo>
+                  This directly decides your plan mode — clearance for
+                  running unlocks easy-running, walk-run clearance unlocks
+                  walk-run intervals, and walking-only clearance keeps the
+                  plan to walking.
+                </FieldInfo>
+              </div>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {CLEARED_ACTIVITY_OPTIONS.map((option) => {
                   const checkboxId = `cleared-activity-${option.value}`;
@@ -313,21 +338,21 @@ export function HealthUpdateDialog({
             </div>
           )}
 
-          <div className="space-y-1.5 rounded-md border px-3 py-2.5">
-            <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between rounded-md border px-3 py-2.5">
+            <div className="flex items-center gap-1.5">
               <Label htmlFor="health-update-additional-restrictions" className="text-sm">
                 Any other restrictions not covered above?
               </Label>
-              <Switch
-                id="health-update-additional-restrictions"
-                checked={hasAdditionalRestrictions}
-                onCheckedChange={(state) => setHasAdditionalRestrictions(state === true)}
-              />
+              <FieldInfo>
+                Turning this on sends this to a coach for review instead of
+                an automatic revision.
+              </FieldInfo>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Turning this on sends this to a coach for review instead of an
-              automatic revision.
-            </p>
+            <Switch
+              id="health-update-additional-restrictions"
+              checked={hasAdditionalRestrictions}
+              onCheckedChange={(state) => setHasAdditionalRestrictions(state === true)}
+            />
           </div>
 
           <DialogFooter>
@@ -340,7 +365,7 @@ export function HealthUpdateDialog({
             </Button>
             <Button type="submit" disabled={!canSubmit || createHealthUpdate.isPending}>
               {createHealthUpdate.isPending && <Loader2 className="size-4 animate-spin" />}
-              Save health update
+              Save & request updated plan
             </Button>
           </DialogFooter>
         </form>
