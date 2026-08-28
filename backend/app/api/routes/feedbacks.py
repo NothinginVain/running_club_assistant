@@ -10,29 +10,33 @@ from app.db.session import get_db
 from app.models.recommendation import Recommendation
 from app.models.user import User
 from app.prompts.feedback_input import build_feedback_revision_input
-from app.prompts.feedback_prompt import get_feedback_prompt
-from app.schemas.feedback import FeedbackCreate, FeedbackRead
+from app.prompts.feedback_prompt import (
+    get_adapted_feedback_prompt,
+    get_feedback_prompt,
+)
+from app.schemas.feedback import FeedbackCreate, FeedbackRead, HealthUpdateCreate
 from app.schemas.recommendation import RecommendationRead
 from app.services.feedback_manager import (
     HEALTH_UPDATE_QUESTIONS,
     assess_feedback_safety,
 )
 from app.services.feedback_service import (
+    build_health_update_feedback,
     create_feedback,
     get_feedback_by_recommendation_id,
 )
 from app.services.plan_revision_service import build_remaining_plan_context
 from app.services.recommendation_title_service import build_revision_title
-from app.services.running_plan_service import synchronize_weekly_distances
+from app.services.running_plan_service import (
+    synchronize_weekly_distances,
+    validate_plan_mode,
+)
 
 
 router = APIRouter(
     prefix="/recommendations",
     tags=["Feedback"],
 )
-
-REVISION_PROMPT_VERSION = "remaining"
-
 
 def _get_owned_recommendation(
         recommendation_id: UUID,
@@ -163,6 +167,8 @@ def revise_recommendation_from_feedback(
             },
         )
 
+    plan_mode = safety_assessment["plan_mode"]
+
     user_dict = {"height_cm": current_user.height_cm}
 
     remaining_plan = build_remaining_plan_context(
@@ -171,27 +177,50 @@ def revise_recommendation_from_feedback(
         requested_start_date=safety_assessment.get("requested_start_date"),
     )
 
-    instructions = get_feedback_prompt(REVISION_PROMPT_VERSION)
+    if plan_mode == "normal_running":
+        prompt_version = "remaining"
+        instructions = get_feedback_prompt(
+            prompt_version
+        )
+    else:
+        prompt_version, instructions = (
+            get_adapted_feedback_prompt(
+                plan_mode
+            )
+        )
+
     input_text = build_feedback_revision_input(
         user_dict,
         recommendation_dict,
         feedback_dicts,
         remaining_plan,
+        safety_assessment,
     )
 
     try:
         revised = get_recommendation(
             input_text,
             instructions,
-            REVISION_PROMPT_VERSION,
+            prompt_version,
+            plan_mode=plan_mode,
         )
     except Exception as error:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="Your coach couldn't generate an updated plan right now. Please try again in a moment.",
         ) from error
-    revised = synchronize_weekly_distances(revised)
-    
+    revised = synchronize_weekly_distances(
+        revised
+    )
+
+    revised = validate_plan_mode(
+        revised,
+        plan_mode,
+        safety_assessment.get(
+            "medically_cleared_activities"
+        ) or [],
+    )
+
     expected_dates = [
         day["date"] for day in remaining_plan["remaining_training_days"]
     ]
@@ -220,3 +249,36 @@ def revise_recommendation_from_feedback(
     db.refresh(new_recommendation)
 
     return new_recommendation
+
+
+@router.post(
+    "/{recommendation_id}/health-update",
+    response_model=FeedbackRead,
+    status_code=status.HTTP_201_CREATED,
+)
+def add_health_update_feedback(
+    recommendation_id: UUID,
+    health_update: HealthUpdateCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    recommendation = _get_owned_recommendation(
+        recommendation_id,
+        current_user,
+        db,
+    )
+
+    feedback_data = build_health_update_feedback(
+        health_update,
+    )
+
+    feedback = create_feedback(
+        db,
+        recommendation,
+        feedback_data,
+    )
+
+    db.commit()
+    db.refresh(feedback)
+
+    return feedback

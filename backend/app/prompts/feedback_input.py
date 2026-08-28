@@ -7,6 +7,7 @@ def build_feedback_revision_input(
         recommendation: dict[str, Any],
         feedback_entries: list[dict[str, Any]],
         remaining_plan: dict[str, Any],
+        safety_assessment: dict[str, Any] | None = None,
 ) -> str:
     if not feedback_entries:
         raise ValueError(
@@ -39,6 +40,23 @@ def build_feedback_revision_input(
         ),
     }
 
+    safety_contract = None
+
+    if safety_assessment is not None:
+        safety_contract = {
+            "plan_mode": safety_assessment.get(
+                "plan_mode"
+            ),
+            "current_pain_level": safety_assessment.get(
+                "current_pain_level"
+            ),
+            "medically_cleared_activities": (
+                safety_assessment.get(
+                    "medically_cleared_activities"
+                )
+            ),
+        }
+
     return f"""
     TASK
     Revise the selected plan for the remaining period only.
@@ -51,6 +69,9 @@ def build_feedback_revision_input(
 
     SELECTED PLAN CONTEXT
     {json.dumps(selected_plan_context, ensure_ascii=False)}
+
+    SAFETY CONTRACT
+    {json.dumps(safety_contract, ensure_ascii=False)}
 
     REMAINING PLAN
     {json.dumps(remaining_plan, ensure_ascii=False)}

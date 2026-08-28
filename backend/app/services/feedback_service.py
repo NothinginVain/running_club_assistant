@@ -5,7 +5,46 @@ from sqlalchemy.orm import Session
 
 from app.models.feedback import Feedback
 from app.models.recommendation import Recommendation
-from app.schemas.feedback import FeedbackCreate
+from app.schemas.feedback import FeedbackCreate, HealthUpdateCreate
+
+
+def build_health_update_feedback(
+        health_update: HealthUpdateCreate,
+) -> FeedbackCreate:
+    warning_symptoms = ", ".join(
+        health_update.warning_symptoms
+    )
+
+    if health_update.medically_cleared_activities:
+        cleared_activities = ", ".join(
+            activity.value
+            for activity
+            in health_update.medically_cleared_activities
+        )
+    else:
+        cleared_activities = "none"
+
+    additional_restrictions = (
+        "yes"
+        if health_update.has_additional_restrictions
+        else "no"
+    )
+
+    feedback_text = (
+        "HEALTH_UPDATE_V1\n"
+        f"current_pain_level: {health_update.current_pain_level}\n"
+        f"warning_symptoms: {warning_symptoms}\n"
+        f"walking_symptom_response: "
+        f"{health_update.walking_symptom_response}\n"
+        f"professional_clearance_status: "
+        f"{health_update.professional_clearance_status}\n"
+        f"medically_cleared_activities: {cleared_activities}\n"
+        f"has_additional_restrictions: {additional_restrictions}"
+    )
+
+    return FeedbackCreate(
+        feedback=feedback_text,
+    )
 
 
 def create_feedback(

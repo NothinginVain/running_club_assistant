@@ -76,7 +76,7 @@ def get_feedback_safety_assessment(
         prompt_version: str,
 ) -> dict[str, Any]:
     response = client.responses.parse(
-        model="gpt-4o-mini",
+        model="gpt-5-mini",
         instructions=instructions,
         input=input_text,
         text_format=FeedbackSafetyAssessment,

@@ -37,6 +37,13 @@ def synchronize_weekly_distances(
     content = recommendation["content"]
     training_days = content.get("training_days", [])
 
+    # The model doesn't reliably emit training_days in chronological order
+    # (it tends to follow preferred_training_days' input order instead), so
+    # anything reading this array positionally -- the frontend's weekly
+    # display, or the revision flow's date-consistency check -- needs a
+    # guaranteed date order rather than trusting generation order.
+    training_days.sort(key=lambda day: day["date"])
+
     totals_by_week = calculate_weekly_distance_totals(
         training_days
     )

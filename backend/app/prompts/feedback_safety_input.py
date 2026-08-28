@@ -21,8 +21,8 @@ def build_feedback_safety_input(
         "current_pain_level": survey.get(
             "current_pain_level"
         ),
-        "has_medical_clearance": survey.get(
-            "has_medical_clearance"
+        "medically_cleared_activities": survey.get(
+            "medically_cleared_activities"
         ),
         "recovery_level": survey.get(
             "recovery_level"

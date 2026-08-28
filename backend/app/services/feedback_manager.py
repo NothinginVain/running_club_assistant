@@ -27,7 +27,7 @@ HEALTH_UPDATE_QUESTIONS: tuple[str, ...] = (
 def assess_feedback_safety(
         recommendation,
         feedback_entries,
-        prompt_version="safety3",
+        prompt_version="safety4",
 ):
     instructions = get_feedback_safety_prompt(
         prompt_version,
