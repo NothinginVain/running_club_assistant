@@ -84,7 +84,6 @@ export const RECOMMENDATION_RATING_MAX = 5;
 export interface RevisionSafetyError {
   reason: "needs_health_update" | "requires_coach_review";
   message: string;
-  questions?: string[];
 }
 
 export interface TrainingBlockedError {

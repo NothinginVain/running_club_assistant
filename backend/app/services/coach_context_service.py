@@ -19,7 +19,7 @@ SURVEY_FIELDS = (
     "preferred_training_days",
     "current_issue_areas",
     "current_pain_level",
-    "has_medical_clearance",
+    "medically_cleared_activities",
     "main_preference",
 )
 

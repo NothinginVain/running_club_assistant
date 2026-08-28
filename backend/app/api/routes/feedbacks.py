@@ -16,10 +16,7 @@ from app.prompts.feedback_prompt import (
 )
 from app.schemas.feedback import FeedbackCreate, FeedbackRead, HealthUpdateCreate
 from app.schemas.recommendation import RecommendationRead
-from app.services.feedback_manager import (
-    HEALTH_UPDATE_QUESTIONS,
-    assess_feedback_safety,
-)
+from app.services.feedback_manager import assess_feedback_safety
 from app.services.feedback_service import (
     build_health_update_feedback,
     create_feedback,
@@ -154,7 +151,6 @@ def revise_recommendation_from_feedback(
             detail={
                 "reason": "needs_health_update",
                 "message": safety_assessment["message"],
-                "questions": list(HEALTH_UPDATE_QUESTIONS),
             },
         )
 

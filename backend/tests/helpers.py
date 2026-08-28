@@ -15,7 +15,6 @@ VALID_SURVEY_ANSWERS = {
     "available_equipment": ["none"],
     "current_issue_areas": ["none"],
     "current_pain_level": 0,
-    "has_medical_clearance": None,
     "recovery_level": "good",
     "average_sleep_duration": "7_to_8_hours",
     "stress_level": "moderate",

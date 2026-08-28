@@ -141,10 +141,9 @@ for coach review.
   editing an earlier one in place. The history page shows prior surveys, and
   deletion is soft so existing recommendations keep their source snapshot.
 - **Regenerating from feedback** surfaces the backend's safety gate exactly:
-  a `needs_health_update` response opens a dialog with the backend-provided
-  questions (compiled into one feedback entry on submit, same shape the CLI
-  produces) and a `requires_coach_review` response shows a static "paused
-  for human review" message — no client ever second-guesses that gate.
+  a `needs_health_update` response opens the structured health-update dialog,
+  and a `requires_coach_review` response shows a static "paused for human
+  review" message — no client ever second-guesses that gate.
 - **RAG/knowledge-base internals are not exposed.** The chat UI only ever
   shows `reply` text; embeddings, retrieved chunks, and Langfuse are
   entirely backend-internal.
