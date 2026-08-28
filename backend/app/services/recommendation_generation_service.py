@@ -23,6 +23,22 @@ def assess_training_safety(
     survey,
     prompt_version="safety1",
 ):
+    answers = survey.get("answers") or {}
+
+    issue_areas = set(
+        answers.get("current_issue_areas") or []
+    )
+    pain_level = answers.get("current_pain_level")
+
+    if (
+            pain_level == 0
+            and issue_areas == {"none"}
+    ):
+        return {
+            "plan_mode": "normal_running",
+            "message": "No current pain or injury issue was reported.",
+        }
+
     instructions = get_training_safety_prompt(
         prompt_version
     )

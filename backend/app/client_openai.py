@@ -17,6 +17,7 @@ def get_training_safety_assessment(
 ) -> dict[str, Any]:
     response = client.responses.parse(
         model="gpt-5-mini",
+        reasoning={"effort":"minimal"},
         instructions=instructions,
         input=input_text,
         text_format=TrainingSafetyAssessment,
@@ -77,6 +78,7 @@ def get_feedback_safety_assessment(
 ) -> dict[str, Any]:
     response = client.responses.parse(
         model="gpt-5-mini",
+        reasoning={"effort":"minimal"},
         instructions=instructions,
         input=input_text,
         text_format=FeedbackSafetyAssessment,
