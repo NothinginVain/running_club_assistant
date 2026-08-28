@@ -68,7 +68,7 @@ const STEPS: StepDefinition[] = [
     fields: [
       "current_issue_areas",
       "current_pain_level",
-      "has_medical_clearance",
+      "medically_cleared_activities",
       "recovery_level",
       "average_sleep_duration",
       "stress_level",

@@ -91,6 +91,15 @@ export const IssueAreaOption = {
 export type IssueAreaOption =
   (typeof IssueAreaOption)[keyof typeof IssueAreaOption];
 
+export const MedicallyClearedActivity = {
+  NOT_CLEARED: "not_cleared",
+  WALK: "walk",
+  WALK_RUN: "walk_run",
+  RUN: "run",
+} as const;
+export type MedicallyClearedActivity =
+  (typeof MedicallyClearedActivity)[keyof typeof MedicallyClearedActivity];
+
 export const RecoveryLevel = {
   POOR: "poor",
   FAIR: "fair",

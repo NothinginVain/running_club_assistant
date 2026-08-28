@@ -8,6 +8,7 @@ import {
   GoalOption,
   IssueAreaOption,
   MainPreference,
+  MedicallyClearedActivity,
   RecoveryLevel,
   SleepDurationOption,
   StressLevel,
@@ -64,7 +65,10 @@ export const surveyAnswersSchema = z
       .array(z.enum(enumValues(IssueAreaOption)))
       .min(1, "Choose at least one option"),
     current_pain_level: z.number().min(0).max(10),
-    has_medical_clearance: z.boolean().nullable(),
+    medically_cleared_activities: z
+      .array(z.enum(enumValues(MedicallyClearedActivity)))
+      .max(3, "Choose up to 3 options")
+      .nullable(),
     recovery_level: z.enum(enumValues(RecoveryLevel)),
     average_sleep_duration: z.enum(enumValues(SleepDurationOption)),
     stress_level: z.enum(enumValues(StressLevel)),
@@ -133,6 +137,48 @@ export const surveyAnswersSchema = z
         message: "Event date must be after the plan start date",
       });
     }
+
+    const hasHealthConcern =
+      values.current_pain_level > 0 ||
+      !values.current_issue_areas.includes(IssueAreaOption.NONE);
+
+    if (
+      hasHealthConcern &&
+      (!values.medically_cleared_activities ||
+        values.medically_cleared_activities.length === 0)
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["medically_cleared_activities"],
+        message: "Required when pain or an issue is reported",
+      });
+    }
+
+    if (values.medically_cleared_activities) {
+      if (
+        values.medically_cleared_activities.includes(
+          MedicallyClearedActivity.NOT_CLEARED,
+        ) &&
+        values.medically_cleared_activities.length > 1
+      ) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["medically_cleared_activities"],
+          message: "\"Not cleared\" can't be combined with other options",
+        });
+      }
+
+      if (
+        new Set(values.medically_cleared_activities).size !==
+        values.medically_cleared_activities.length
+      ) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["medically_cleared_activities"],
+          message: "Options cannot repeat",
+        });
+      }
+    }
   });
 
 export type SurveyAnswersValues = z.infer<typeof surveyAnswersSchema>;
@@ -154,7 +200,7 @@ export const surveyAnswersDefaultValues: SurveyAnswersValues = {
   available_equipment: [EquipmentOption.NONE],
   current_issue_areas: [IssueAreaOption.NONE],
   current_pain_level: 0,
-  has_medical_clearance: null,
+  medically_cleared_activities: null,
   recovery_level: RecoveryLevel.GOOD,
   average_sleep_duration: SleepDurationOption.SEVEN_TO_8_HOURS,
   stress_level: StressLevel.MODERATE,

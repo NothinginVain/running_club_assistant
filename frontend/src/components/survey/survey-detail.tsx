@@ -7,6 +7,7 @@ import {
   GOAL_OPTIONS,
   ISSUE_AREA_OPTIONS,
   MAIN_PREFERENCE_OPTIONS,
+  MEDICALLY_CLEARED_ACTIVITY_OPTIONS,
   RECOVERY_LEVEL_OPTIONS,
   SLEEP_DURATION_OPTIONS,
   STRESS_LEVEL_OPTIONS,
@@ -104,13 +105,14 @@ export function SurveyDetail({ survey }: { survey: SurveyRead }) {
         />
         <Field label="Pain level" value={`${a.current_pain_level}/10`} />
         <Field
-          label="Medical clearance"
+          label="Medically cleared for"
           value={
-            a.has_medical_clearance === null
-              ? "Not sure"
-              : a.has_medical_clearance
-                ? "Yes"
-                : "No"
+            a.medically_cleared_activities && a.medically_cleared_activities.length > 0
+              ? labelsFor(
+                  MEDICALLY_CLEARED_ACTIVITY_OPTIONS,
+                  a.medically_cleared_activities,
+                )
+              : "Not reported"
           }
         />
         <Field

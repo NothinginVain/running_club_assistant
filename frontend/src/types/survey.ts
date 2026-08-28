@@ -6,6 +6,7 @@ import type {
   GoalOption,
   IssueAreaOption,
   MainPreference,
+  MedicallyClearedActivity,
   RecommendationType,
   RecoveryLevel,
   SleepDurationOption,
@@ -32,7 +33,7 @@ export interface RunningPlanSurveyAnswers {
   available_equipment: EquipmentOption[];
   current_issue_areas: IssueAreaOption[];
   current_pain_level: number;
-  has_medical_clearance: boolean | null;
+  medically_cleared_activities: MedicallyClearedActivity[] | null;
   recovery_level: RecoveryLevel;
   average_sleep_duration: SleepDurationOption;
   stress_level: StressLevel;

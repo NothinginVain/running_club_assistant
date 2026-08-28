@@ -8,6 +8,15 @@ import { Button } from "@/components/ui/button";
 import { RunningFigureLoader } from "@/components/icons/running-figure-loader";
 import { useGenerateRecommendation } from "@/hooks/use-generate-recommendation";
 import { ApiError } from "@/types/api";
+import type { TrainingBlockedError } from "@/types/recommendation";
+
+function isTrainingBlockedError(detail: unknown): detail is TrainingBlockedError {
+  return (
+    typeof detail === "object" &&
+    detail !== null &&
+    (detail as { reason?: unknown }).reason === "training_blocked"
+  );
+}
 
 export function GeneratePlanButton({
   label = "Generate my plan",
@@ -24,6 +33,11 @@ export function GeneratePlanButton({
         router.push(`/plans/${recommendation.id}`);
       },
       onError: (error) => {
+        if (error instanceof ApiError && isTrainingBlockedError(error.detail)) {
+          toast.error(error.detail.message, { duration: 12000 });
+          return;
+        }
+
         const message =
           error instanceof ApiError
             ? error.message

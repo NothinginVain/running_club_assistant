@@ -31,9 +31,9 @@ export function TrainingDaysView({ content }: { content: PlanContent }) {
         const week = content.weekly_distance.find(
           (item) => item.week_number === weekNumber,
         );
-        const days = content.training_days.filter(
-          (day) => day.week_number === weekNumber,
-        );
+        const days = content.training_days
+          .filter((day) => day.week_number === weekNumber)
+          .sort((a, b) => a.date.localeCompare(b.date));
 
         return (
           <TabsContent key={weekNumber} value={String(weekNumber)} className="space-y-3 pt-4">

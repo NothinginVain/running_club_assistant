@@ -6,6 +6,7 @@ import {
   GoalOption,
   IssueAreaOption,
   MainPreference,
+  MedicallyClearedActivity,
   RecoveryLevel,
   SleepDurationOption,
   StressLevel,
@@ -98,6 +99,13 @@ export const ISSUE_AREA_OPTIONS: SelectOption<IssueAreaOption>[] = [
   { value: IssueAreaOption.HIP, label: "Hip" },
   { value: IssueAreaOption.LOWER_BACK, label: "Lower back" },
   { value: IssueAreaOption.OTHER, label: "Other" },
+];
+
+export const MEDICALLY_CLEARED_ACTIVITY_OPTIONS: SelectOption<MedicallyClearedActivity>[] = [
+  { value: MedicallyClearedActivity.NOT_CLEARED, label: "Not cleared for any of these" },
+  { value: MedicallyClearedActivity.WALK, label: "Walking" },
+  { value: MedicallyClearedActivity.WALK_RUN, label: "Walk-run intervals" },
+  { value: MedicallyClearedActivity.RUN, label: "Running" },
 ];
 
 export const RECOVERY_LEVEL_OPTIONS: SelectOption<RecoveryLevel>[] = [

@@ -9,6 +9,14 @@ export interface RunningBlock {
   details: string;
 }
 
+export interface WalkingBlock {
+  type: "walk" | "walk_run";
+  distance_km: number;
+  duration_minutes: number;
+  intensity_level: string;
+  details: string;
+}
+
 export interface SupportBlock {
   focus: string;
   timing: SupportTiming;
@@ -21,6 +29,7 @@ export interface TrainingDay {
   date: string;
   day: string;
   running: RunningBlock | null;
+  walking: WalkingBlock | null;
   strength: SupportBlock | null;
   mobility: SupportBlock | null;
   notes: string | null;
@@ -76,4 +85,9 @@ export interface RevisionSafetyError {
   reason: "needs_health_update" | "requires_coach_review";
   message: string;
   questions?: string[];
+}
+
+export interface TrainingBlockedError {
+  reason: "training_blocked";
+  message: string;
 }
