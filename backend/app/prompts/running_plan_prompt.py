@@ -5,28 +5,17 @@ Create a safe, practical running plan using only the supplied runner profile
 and survey. The response is parsed into a strict structured schema.
 
 Plan structure:
-- Create exactly plan_duration_weeks weeks.
-- Include exactly one weekly_distance entry for every week.
-- Include exactly runs_per_week running sessions in every week.
-- When preferred_training_days contains exactly runs_per_week days, schedule
-  one running session on each preferred day.
+- Include exactly runs_per_week running sessions in every full week, except
+  during the taper, event, and immediate post-event recovery periods described
+  below.
+- The partial first week may contain fewer sessions when preferred weekdays
+  occur before plan_start_date. Do not borrow sessions from the next week.
+- Outside those exceptions, when preferred_training_days contains exactly
+  runs_per_week days, schedule one running session on each preferred day.
 - Include training_days only for planned training days.
 - Do not add rest-day entries.
 - Use null for running, strength, or mobility when that block is not planned.
 - Do not invent runner information or medical facts.
-
-Dates:
-- plan_start_date is the first calendar date of Week 1, but it is not
-  automatically a training day.
-- Week 1 ends 6 days after plan_start_date.
-- Every following week is the next consecutive 7-day period.
-- Every training date must fall inside its assigned week.
-- Every training date must use a weekday listed in preferred_training_days.
-- The day field must match the actual weekday of the date.
-- Never create training on a non-preferred weekday.
-- If target_event_date falls inside the plan, include the event as a running
-  session on that exact date.
-- Do not schedule another long run during the event week.
 
 Running and progression:
 - Begin near current_weekly_distance_km.
@@ -120,10 +109,13 @@ Safety boundaries:
 - Omit an exercise when its safety is uncertain from the provided information.
 
 Weekly design:
-- Create exactly plan_duration_weeks weeks.
-- Include one weekly_distance entry for every week.
 - Treat runs_per_week as the maximum number of locomotion sessions, not a
   required number.
+- The partial first week may contain fewer sessions when preferred weekdays
+  occur before plan_start_date. Do not borrow sessions from the next week.
+- When a full week uses fewer locomotion sessions than runs_per_week, state the
+  requested and scheduled frequencies and the safety reason in
+  why_this_plan_fits.
 - Use only preferred_training_days.
 - Support-only days containing strength or mobility are allowed.
 - Do not add empty rest-day entries.
@@ -137,14 +129,6 @@ Weekly design:
   running load.
 - Keep the adapted load stable or use only very small progression when it is
   clearly compatible with the selected mode and reported restrictions.
-
-Dates:
-- plan_start_date begins Week 1 but is not automatically a training day.
-- Week 1 ends six days after plan_start_date.
-- Every later week is the next consecutive seven-day period.
-- Every training date must be inside its assigned week.
-- The day must match the actual weekday of the date.
-- Use only preferred training weekdays.
 
 Distance consistency:
 - Every running or walking block must have a positive distance_km.
@@ -179,16 +163,53 @@ Output expectations:
 """
 
 
+PLAN_CALENDAR_RULES = """
+Dates:
+
+- Create exactly plan_duration_weeks numbered weeks and exactly one
+  weekly_distance entry for each week.
+- Week 1 starts on plan_start_date and ends on the first Sunday on or after it.
+- Every following week starts on Monday and ends on Sunday.
+- Never schedule training before plan_start_date.
+- Every training date must fall inside its assigned week.
+- The day must match the actual weekday of the date.
+- Use only preferred_training_days, except for a normal-running target event
+  scheduled on its exact date.
+- Do not duplicate or move sessions into another week.
+- Return weekly_distance and training_days in chronological order.
+"""
+
+
+NORMAL_EVENT_RULES = """
+Target event:
+
+- When target_event_date falls inside the plan, schedule the event on that exact
+  date. It counts as one running session and replaces the week's long run.
+- Reduce load during the seven days before the event. Use easy or recovery
+  running and avoid long runs, hard workouts, and heavy strength.
+- After the event, use rest or gentle mobility where dates remain. The first
+  later run must be short and easy or recovery intensity.
+- The taper, event, and immediate recovery periods may contain fewer sessions
+  than runs_per_week.
+- If the event ends the plan, put concise post-event recovery guidance in
+  safety_notes.
+"""
+
+
 ADAPTED_MODE_RULES = {
     "easy_running": """
 Required mode: easy_running.
 
 - Running is allowed only at recovery, very_easy, or easy intensity.
 - Do not use steady, tempo, threshold, interval, race, or other quality work.
+- Because running is explicitly cleared, use easy running as the primary
+  locomotion activity across the plan.
 - Decide whether every requested running day is still appropriate; fewer running
   sessions may be used.
-- Walking or walk-run sessions may replace runs only when that exact activity
-  appears in medically_cleared_activities.
+- Substitute an individual session with walking or walk-run only when that
+  specific session needs to be more conservative for safety, and only when
+  that exact activity appears in medically_cleared_activities. Do not
+  substitute walking for every session by default.
 - Other preferred days may become mobility-only or gentle strength sessions.
 - Do not create a traditional long-run progression.
 """,
@@ -224,7 +245,13 @@ def get_running_plan_prompt(
         plan_mode: str,
 ) -> tuple[str, str]:
     if plan_mode == "normal_running":
-        return "normal1", MEDIUM_RUNNING_PLAN_PROMPT_V4
+        instructions = (
+            f"{MEDIUM_RUNNING_PLAN_PROMPT_V4.strip()}\n\n"
+            f"{PLAN_CALENDAR_RULES.strip()}\n\n"
+            f"{NORMAL_EVENT_RULES.strip()}"
+        )
+
+        return "normal2", instructions
 
     if plan_mode not in ADAPTED_MODE_RULES:
         raise ValueError(
@@ -233,7 +260,8 @@ def get_running_plan_prompt(
 
     instructions = (
         f"{ADAPTED_RUNNING_PLAN_PROMPT_V1.strip()}\n\n"
-        f"{ADAPTED_MODE_RULES[plan_mode].strip()}"
+        f"{ADAPTED_MODE_RULES[plan_mode].strip()}\n\n"
+        f"{PLAN_CALENDAR_RULES.strip()}"
     )
 
-    return "adapted1", instructions
+    return "adapted2", instructions

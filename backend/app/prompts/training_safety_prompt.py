@@ -18,12 +18,11 @@ Rules:
 - If pain is above 3, do not select walk_run or easy_running.
   Select walk_only only when walking was explicitly cleared;
   otherwise select blocked.
-- For pain from 0 to 3 with a reported issue:
-  - walk clearance permits walk_only
-  - walk_run clearance permits walk_run
-  - run clearance permits easy_running
-- When multiple activities are cleared, choose the most conservative
-  appropriate mode for the current pain.
+- For pain from 0 to 3 with a reported issue, choose the highest
+  explicitly cleared mode:
+  - run cleared -> easy_running
+  - otherwise walk_run cleared -> walk_run
+  - otherwise walk cleared -> walk_only
 - If the health information is contradictory or unclear, select blocked.
 
 Return a concise message explaining the decision.
