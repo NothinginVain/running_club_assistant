@@ -36,7 +36,7 @@ class RunningPlanSurveyAnswers(BaseModel):
     runs_per_week: Literal[1, 2, 3, 4, 5, 6, 7]
     longest_recent_run_km: float = Field(ge=0)
     preferred_training_days: list[Weekday] = Field(min_length=1, max_length=7)
-    preferred_long_run_day: Weekday
+    preferred_long_run_day: Weekday | None = None
     max_session_minutes: Literal[30, 45, 60, 75, 90, 120]
     preferred_terrain: TerrainOption
     available_equipment: list[EquipmentOption] = Field(min_length=1)
@@ -67,7 +67,10 @@ class RunningPlanSurveyAnswers(BaseModel):
                 "preferred_training_days must include at least runs_per_week days"
             )
 
-        if self.preferred_long_run_day not in self.preferred_training_days:
+        if (
+            self.preferred_long_run_day is not None
+            and self.preferred_long_run_day not in self.preferred_training_days
+        ):
             raise ValueError(
                 "preferred_long_run_day must be included in preferred_training_days"
             )
