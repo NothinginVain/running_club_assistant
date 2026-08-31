@@ -21,6 +21,7 @@ SURVEY_FIELDS = (
     "current_pain_level",
     "medically_cleared_activities",
     "main_preference",
+    "diet_type",
 )
 
 

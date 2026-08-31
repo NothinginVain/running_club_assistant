@@ -22,6 +22,12 @@ import { ChatMessage } from "./chat-message";
 import { useCoachChat } from "./coach-chat-provider";
 import { EndChatSummaryDialog } from "./end-chat-summary-dialog";
 
+const WELCOME_MESSAGE = {
+  role: "assistant" as const,
+  content:
+    "Hi! I’m your Berlin Braves running assistant. Ask me about training and recovery, fueling, running shoes, or club schedules, events, gym, and yoga.",
+};
+
 function ThinkingBubble() {
   return (
     <div className="flex items-start gap-2.5">
@@ -151,11 +157,8 @@ export function CoachChatWidget() {
                 <Skeleton className="ml-auto h-10 w-1/2" />
               </div>
             ) : messages.length === 0 ? (
-              <div className="flex h-full items-center justify-center text-center">
-                <p className="max-w-xs text-sm text-muted-foreground">
-                  Say hello to your assistant. Ask about pacing, recovery, or
-                  how your plan is going.
-                </p>
+              <div className="flex h-full items-start">
+                <ChatMessage message={WELCOME_MESSAGE} />
               </div>
             ) : (
               messages.map((message, index) => (
