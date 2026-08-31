@@ -62,17 +62,14 @@ class PlanContent(BaseModel):
     summary: str
     weekly_distance: list[WeeklyDistance]
     training_days: list[TrainingDay]
-    nutrition: list[str]
     safety_notes: list[str]
 
 
 class PlanExplanation(BaseModel):
     why_this_plan_fits: list[str]
-    important_assumptions: list[str]
 
 
 class RunningPlanOutput(BaseModel):
-    title: str
     content: PlanContent
     explanation: PlanExplanation
 

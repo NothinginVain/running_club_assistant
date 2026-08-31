@@ -46,13 +46,11 @@ export interface PlanContent {
   summary: string;
   weekly_distance: WeeklyDistance[];
   training_days: TrainingDay[];
-  nutrition: string[];
   safety_notes: string[];
 }
 
 export interface PlanExplanation {
   why_this_plan_fits: string[];
-  important_assumptions: string[];
 }
 
 export interface RecommendationRead {

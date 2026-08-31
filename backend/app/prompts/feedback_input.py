@@ -16,7 +16,6 @@ def build_feedback_revision_input(
 
     survey = recommendation.get("survey_snapshot") or {}
     content = recommendation.get("content") or {}
-    explanation = recommendation.get("explanation") or {}
 
     feedback_context = [
         {
@@ -33,11 +32,7 @@ def build_feedback_revision_input(
     selected_plan_context = {
         "title": recommendation.get("title"),
         "summary": content.get("summary"),
-        "nutrition": content.get("nutrition") or [],
         "safety_notes": content.get("safety_notes") or [],
-        "important_assumptions": (
-            explanation.get("important_assumptions") or []
-        ),
     }
 
     safety_contract = None

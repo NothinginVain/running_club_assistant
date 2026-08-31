@@ -120,17 +120,10 @@ export default function RecommendationDetailPage({
         <TrainingDaysView content={content} />
       </section>
 
-      {(content.nutrition.length > 0 || content.safety_notes.length > 0) && (
+      {(content.safety_notes.length > 0 || (explanation?.why_this_plan_fits.length ?? 0) > 0) && (
         <section className="grid gap-6 sm:grid-cols-2">
-          <NoteList title="Nutrition" items={content.nutrition} />
+          <NoteList title="Why this plan fits" items={explanation?.why_this_plan_fits ?? []} />
           <NoteList title="Safety notes" items={content.safety_notes} />
-        </section>
-      )}
-
-      {explanation && (
-        <section className="grid gap-6 sm:grid-cols-2">
-          <NoteList title="Why this plan fits" items={explanation.why_this_plan_fits} />
-          <NoteList title="Assumptions" items={explanation.important_assumptions} />
         </section>
       )}
 

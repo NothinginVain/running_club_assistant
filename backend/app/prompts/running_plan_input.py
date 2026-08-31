@@ -83,8 +83,6 @@ def build_running_plan_input(user, survey, plan_mode):
     Average sleep duration: {answers.get("average_sleep_duration")}
     Stress level: {answers.get("stress_level")}
 
-    Diet type: {answers.get("diet_type")}
-
     Main preference: {answers.get("main_preference")}
     Recommendation detail level: {answers.get("detail_level")}
 

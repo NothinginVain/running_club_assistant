@@ -65,9 +65,8 @@ Output:
 - Running blocks use type, distance_km, intensity_level, and details.
 - Strength and mobility blocks use focus, timing, duration_minutes, and
   details.
-- Provide concise, relevant nutrition and safety notes.
+- Provide concise, relevant safety notes.
 - Explain personalization in why_this_plan_fits.
-- Put genuine assumptions in important_assumptions.
 """
 
 
@@ -155,11 +154,10 @@ Timing values:
 
 Output expectations:
 - Follow the structured running-plan output provided by the application.
-- Keep the summary, nutrition guidance, and safety notes concise.
+- Keep the summary and safety notes concise.
 - Use training_day.notes to explain meaningful replacements or reduced load.
 - Explain how the complete weekly design follows the required mode in
   why_this_plan_fits.
-- Put only genuine uncertainties in important_assumptions.
 """
 
 

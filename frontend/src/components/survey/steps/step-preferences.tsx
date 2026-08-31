@@ -22,7 +22,7 @@ export function StepPreferences() {
         name="diet_type"
         label="Diet type"
         options={DIET_TYPE_OPTIONS}
-        info="Used to tailor the nutrition suggestions included with your plan."
+        info="Used by the running assistant to personalize nutrition guidance."
       />
 
       <div className="space-y-1.5">
@@ -32,8 +32,8 @@ export function StepPreferences() {
             <span className="ml-1 font-normal text-muted-foreground">(optional)</span>
           </Label>
           <FieldInfo>
-            Optional — used only to make nutrition guidance more specific to
-            you.
+            Optional profile context that may help personalize your running
+            guidance.
           </FieldInfo>
         </div>
         <div className="relative">
