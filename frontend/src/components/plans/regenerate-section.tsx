@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { RunningFigureLoader } from "@/components/icons/running-figure-loader";
+import { GenerationProgress } from "@/components/generation/generation-progress";
 import { useReviseRecommendation } from "@/hooks/use-generate-recommendation";
 import { ApiError } from "@/types/api";
 import type { RevisionSafetyError } from "@/types/recommendation";
@@ -83,10 +83,7 @@ export function RegenerateSection({
 
       <Button onClick={handleGenerate} disabled={feedbackCount === 0 || revise.isPending}>
         {revise.isPending ? (
-          <>
-            <RunningFigureLoader label="Updating your plan" />
-            Updating your plan…
-          </>
+          "Updating your plan…"
         ) : (
           <>
             <Sparkles className="size-4" />
@@ -99,6 +96,7 @@ export function RegenerateSection({
           Add feedback above before requesting an updated plan.
         </p>
       )}
+      <GenerationProgress isGenerating={revise.isPending} mode="revise" />
 
       <HealthUpdateDialog
         recommendationId={recommendationId}

@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { RunningFigureLoader } from "@/components/icons/running-figure-loader";
+import { GenerationProgress } from "@/components/generation/generation-progress";
 import { SurveyForm } from "@/components/survey/survey-form";
 import { useGenerateRecommendation } from "@/hooks/use-generate-recommendation";
 import { surveysApi } from "@/lib/api";
@@ -50,6 +50,14 @@ export default function NewSurveyPage() {
 
   const isGenerating = createSurvey.isPending || generate.isPending;
 
+  if (generate.isPending) {
+    return (
+      <div className="mx-auto max-w-xl">
+        <GenerationProgress isGenerating mode="generate" />
+      </div>
+    );
+  }
+
   if (createdSurvey && generate.isError) {
     return (
       <div className="mx-auto max-w-xl space-y-6">
@@ -71,16 +79,7 @@ export default function NewSurveyPage() {
           </AlertDescription>
         </Alert>
 
-        <Button onClick={runGeneration} disabled={generate.isPending}>
-          {generate.isPending ? (
-            <>
-              <RunningFigureLoader label="Generating your plan" />
-              Your coach is building your plan…
-            </>
-          ) : (
-            "Retry generating my plan"
-          )}
-        </Button>
+        <Button onClick={runGeneration}>Retry generating my plan</Button>
       </div>
     );
   }
