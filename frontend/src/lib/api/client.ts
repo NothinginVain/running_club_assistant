@@ -60,7 +60,15 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
       body: body !== undefined ? JSON.stringify(body) : undefined,
       signal,
     });
-  } catch {
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new ApiError({
+        kind: "timeout",
+        status: null,
+        message: "This is taking longer than expected. Please try again.",
+      });
+    }
+
     throw new ApiError({
       kind: "network",
       status: null,

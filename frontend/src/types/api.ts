@@ -7,6 +7,7 @@ export type ApiErrorKind =
   | "bad_request"
   | "server"
   | "network"
+  | "timeout"
   | "unknown";
 
 export interface FieldValidationError {

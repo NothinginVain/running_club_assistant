@@ -6,7 +6,8 @@ import type {
 } from "@/types";
 
 export const recommendationsApi = {
-  generate: () => apiClient.post<RecommendationRead>("/recommendations/generate"),
+  generate: (signal?: AbortSignal) =>
+    apiClient.post<RecommendationRead>("/recommendations/generate", undefined, signal),
 
   list: () => apiClient.get<RecommendationRead[]>("/recommendations/"),
 
@@ -34,8 +35,10 @@ export const recommendationsApi = {
   remove: (recommendationId: string) =>
     apiClient.delete<void>(`/recommendations/${recommendationId}`),
 
-  reviseFromFeedback: (recommendationId: string) =>
+  reviseFromFeedback: (recommendationId: string, signal?: AbortSignal) =>
     apiClient.post<RecommendationRead>(
       `/recommendations/${recommendationId}/revise`,
+      undefined,
+      signal,
     ),
 };
