@@ -16,6 +16,7 @@ from app.prompts.training_safety_prompt import (
 )
 from app.services.running_plan_service import (
     synchronize_weekly_distances,
+    validate_plan_mode,
 )
 
 
@@ -167,6 +168,17 @@ def generate_recommendation(
             plan_mode=plan_mode,
         )
 
-        return synchronize_weekly_distances(
+        recommendation = synchronize_weekly_distances(
             recommendation
+        )
+
+        cleared_activities = (
+            (survey.get("answers") or {}).get("medically_cleared_activities")
+            or []
+        )
+
+        return validate_plan_mode(
+            recommendation,
+            plan_mode,
+            cleared_activities,
         )
