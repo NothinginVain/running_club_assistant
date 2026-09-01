@@ -57,7 +57,6 @@ def build_running_plan_input(user, survey, plan_mode):
 
     Name: {user.get("full_name")}
     Age: {user.get("age")}
-    Location: {user.get("address")}
     Weight: {answers.get("weight_kg")} kg
 
     RUNNING SURVEY

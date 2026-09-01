@@ -1,3 +1,4 @@
+from datetime import date
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -75,9 +76,18 @@ def generate_recommendation_for_current_user(
             detail='Automatic generation is only available for running-plan surveys',
         )
 
+    age = None
+
+    if current_user.birth:
+        today = date.today()
+        birth = current_user.birth
+        age = today.year - birth.year - (
+            (today.month, today.day) < (birth.month, birth.day)
+        )
+
     user_dict = {
         'full_name': current_user.full_name,
-        'address': current_user.address,
+        'age': age,
     }
     survey_dict = {
         'answers': survey.answers,
