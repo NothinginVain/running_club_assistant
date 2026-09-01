@@ -1,15 +1,18 @@
 "use client";
 
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { use } from "react";
+import { useRouter } from "next/navigation";
+import { use, useState } from "react";
 import { toast } from "sonner";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FeedbackForm } from "@/components/feedback/feedback-form";
 import { FeedbackList } from "@/components/feedback/feedback-list";
+import { DeletePlanDialog } from "@/components/plans/delete-plan-dialog";
 import { FavoriteButton } from "@/components/plans/favorite-button";
 import { NoteList } from "@/components/plans/note-list";
 import { RegenerateSection } from "@/components/plans/regenerate-section";
@@ -27,9 +30,11 @@ export default function RecommendationDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const router = useRouter();
   const { data: recommendation, isLoading, isError } = useRecommendation(id);
   const { data: feedback, isLoading: isFeedbackLoading } = useFeedback(id);
   const updateRating = useUpdateRating(id);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -78,10 +83,21 @@ export default function RecommendationDetailPage({
               Created {formatDate(recommendation.created_at)}
             </p>
           </div>
-          <FavoriteButton
-            recommendationId={recommendation.id}
-            isFavorite={recommendation.is_favorite}
-          />
+          <div className="flex items-center gap-1">
+            <FavoriteButton
+              recommendationId={recommendation.id}
+              isFavorite={recommendation.is_favorite}
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label="Delete plan"
+              onClick={() => setDeleteOpen(true)}
+            >
+              <Trash2 className="size-4 text-destructive" />
+            </Button>
+          </div>
         </div>
 
         <div className="mt-4 flex items-center gap-2">
@@ -150,6 +166,13 @@ export default function RecommendationDetailPage({
           feedbackCount={feedback?.length ?? 0}
         />
       </section>
+
+      <DeletePlanDialog
+        recommendationId={id}
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        onDeleted={() => router.push("/plans")}
+      />
     </div>
   );
 }

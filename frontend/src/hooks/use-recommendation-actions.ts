@@ -38,6 +38,21 @@ export function useToggleFavorite(recommendationId: string) {
   });
 }
 
+export function useDeleteRecommendation(recommendationId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => recommendationsApi.remove(recommendationId),
+    onSuccess: () => {
+      queryClient.removeQueries({
+        queryKey: queryKeys.recommendation(recommendationId),
+      });
+      queryClient.invalidateQueries({ queryKey: queryKeys.recommendations });
+      queryClient.invalidateQueries({ queryKey: queryKeys.favoriteRecommendations });
+    },
+  });
+}
+
 export function useUpdateRating(recommendationId: string) {
   const queryClient = useQueryClient();
   const key = queryKeys.recommendation(recommendationId);
