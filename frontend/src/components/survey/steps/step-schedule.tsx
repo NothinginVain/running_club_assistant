@@ -47,8 +47,8 @@ export function StepSchedule() {
           <Label htmlFor="preferred_long_run_day">Preferred long-run day</Label>
           <FieldInfo>
             Your weekly long run, if you have one, is placed on this day.
-            Choose &quot;No preference&quot; if you don&apos;t want a
-            dedicated long run.
+            Choose &quot;No long run&quot; to skip a dedicated long run —
+            your mileage will be spread across your other sessions instead.
           </FieldInfo>
         </div>
         <Controller
@@ -65,14 +65,14 @@ export function StepSchedule() {
                 <SelectValue placeholder="Choose a training day above first">
                   {(value: string) =>
                     value === "none"
-                      ? "No preference"
+                      ? "No long run"
                       : (WEEKDAY_OPTIONS.find((option) => option.value === value)
                           ?.label ?? "Choose a training day above first")
                   }
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">No preference</SelectItem>
+                <SelectItem value="none">No long run</SelectItem>
                 {longRunDayOptions.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}

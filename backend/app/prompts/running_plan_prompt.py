@@ -23,7 +23,10 @@ Running and progression:
   from the preceding week.
 - Weekly distance may decrease for recovery or taper weeks.
 - Keep long-run progression gradual.
-- Put the long run on preferred_long_run_day.
+- When preferred_long_run_day is set, put the long run on that day.
+- When preferred_long_run_day is not set, do not include a dedicated long
+  run; distribute that week's running distance across the other scheduled
+  running sessions instead.
 - Respect longest_recent_run_km, experience_level, current pain, recovery,
   stress, and maximum session duration.
 - Be conservative when pain, injury, poor recovery, or limited experience

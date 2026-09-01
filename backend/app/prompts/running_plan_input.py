@@ -44,6 +44,10 @@ def build_running_plan_input(user, survey, plan_mode):
         answers.get("medically_cleared_activities") or []
     ) or "not provided"
 
+    long_run_day = (
+        answers.get("preferred_long_run_day") or "none (no dedicated long run)"
+    )
+
     return f"""
     REQUIRED PLAN MODE: {plan_mode}
 
@@ -70,7 +74,7 @@ def build_running_plan_input(user, survey, plan_mode):
     Longest recent run: {answers.get("longest_recent_run_km")} km
 
     Preferred training days: {preferred_days}
-    Preferred long-run day: {answers.get("preferred_long_run_day")}
+    Preferred long-run day: {long_run_day}
     Maximum session duration: {answers.get("max_session_minutes")} minutes
     Preferred terrain: {answers.get("preferred_terrain")}
     Available equipment: {equipment}
