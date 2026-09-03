@@ -8,6 +8,11 @@ project virtual environment.
 A Next.js frontend lives in [`frontend/`](frontend/) — see
 [`frontend/README.md`](frontend/README.md) for its setup and architecture.
 
+For a code-level map of the AI flows, start with
+[`docs/SYSTEM_FLOW_NOTES.md`](docs/SYSTEM_FLOW_NOTES.md). It currently contains
+the deep RAG walkthrough and the study roadmap for coach context, memory, chat,
+and plan generation.
+
 ## Features
 
 - Cookie-based authentication and user-owned API routes
