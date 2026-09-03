@@ -165,8 +165,6 @@ def revise_recommendation_from_feedback(
 
     plan_mode = safety_assessment["plan_mode"]
 
-    user_dict = {"height_cm": current_user.height_cm}
-
     remaining_plan = build_remaining_plan_context(
         recommendation_dict,
         date.today(),
@@ -186,7 +184,6 @@ def revise_recommendation_from_feedback(
         )
 
     input_text = build_feedback_revision_input(
-        user_dict,
         recommendation_dict,
         feedback_dicts,
         remaining_plan,

@@ -3,7 +3,6 @@ from typing import Any
 
 
 def build_feedback_revision_input(
-        user: dict[str, Any],
         recommendation: dict[str, Any],
         feedback_entries: list[dict[str, Any]],
         remaining_plan: dict[str, Any],
@@ -24,10 +23,6 @@ def build_feedback_revision_input(
         }
         for entry in feedback_entries
     ]
-
-    runner_measurements = {
-        "height_cm": user.get("height_cm"),
-    }
 
     selected_plan_context = {
         "title": recommendation.get("title"),
@@ -55,9 +50,6 @@ def build_feedback_revision_input(
     return f"""
     TASK
     Revise the selected plan for the remaining period only.
-
-    RUNNER MEASUREMENTS
-    {json.dumps(runner_measurements, ensure_ascii=False)}
 
     SURVEY SNAPSHOT
     {json.dumps(survey, ensure_ascii=False)}
