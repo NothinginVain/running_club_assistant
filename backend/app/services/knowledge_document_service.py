@@ -21,6 +21,12 @@ REQUIRED_FIELDS = {
 
 
 def parse_knowledge_document(path: Path) -> dict:
+    """Parse one Markdown knowledge file into fields for ``KnowledgeBase``.
+
+    The file must contain YAML frontmatter between two ``---`` markers,
+    followed by a non-empty Markdown body. The returned dictionary can be
+    passed directly to ``KnowledgeBase(**document)``.
+    """
     parts = path.read_text(encoding="utf-8").split("---", 2)
 
     if len(parts) != 3:
@@ -59,6 +65,12 @@ def parse_knowledge_document(path: Path) -> dict:
 
 
 def load_knowledge_documents(directory: Path) -> list[dict]:
+    """Load and validate every top-level Markdown document in a directory.
+
+    Files are sorted to make script output deterministic. Subdirectories are
+    intentionally ignored, and duplicate titles are rejected so every document
+    remains clearly identifiable in logs and retrieved context.
+    """
     documents = [
         parse_knowledge_document(path)
         for path in sorted(directory.glob("*.md"))
@@ -75,8 +87,28 @@ def load_knowledge_documents(directory: Path) -> list[dict]:
 def sync_knowledge_documents(
         db: Session,
         documents: list[dict],
-        delete_missing: bool = False,
 ) -> dict[str, list[str]]:
+    """Make ``KnowledgeBase`` mirror the supplied Markdown documents.
+
+    ``source`` is the identity of a document. A matching row is updated, a new
+    source is inserted, and a row whose source is absent from ``documents`` is
+    deleted. This makes ``backend/knowledge_docs`` the source of truth.
+
+    Args:
+        db: Active SQLAlchemy session. Changes are staged on this session.
+        documents: Parsed document dictionaries, normally returned by
+            ``load_knowledge_documents()``.
+
+    Returns:
+        Lists of document titles grouped by the action taken: ``created``,
+        ``updated``, ``unchanged``, and ``deleted``.
+
+    Important:
+        This function does not commit or roll back the transaction and does not
+        rebuild embeddings. The caller owns the transaction; the separate
+        indexing script refreshes ``KnowledgeChunk`` rows afterward.
+    """
+    # Read existing rows once, then use direct source lookups in the loop.
     existing_documents = list(
         db.scalars(select(KnowledgeBase)).all()
     )
@@ -84,37 +116,32 @@ def sync_knowledge_documents(
     documents_by_source = {
         document.source: document
         for document in existing_documents
-        if document.source
-    }
-    documents_by_title = {
-        document.title: document
-        for document in existing_documents
     }
 
     result = {
         "created": [],
         "updated": [],
         "unchanged": [],
-        "stale": [],
         "deleted": [],
     }
-    matched_ids = set()
 
+    incoming_sources = {
+        document["source"]
+        for document in documents
+    }
+
+    # Create a row for a new file, or update the row for an existing file.
     for data in documents:
         document = documents_by_source.get(data["source"])
-
-        # This title fallback adopts rows created by the old seeder.
-        if document is None:
-            document = documents_by_title.get(data["title"])
 
         if document is None:
             db.add(KnowledgeBase(**data))
             result["created"].append(data["title"])
             continue
 
-        matched_ids.add(document.id)
         changed = False
 
+        # Assign only changed values, keeping unchanged rows out of UPDATEs.
         for field, value in data.items():
             if getattr(document, field) != value:
                 setattr(document, field, value)
@@ -123,18 +150,10 @@ def sync_knowledge_documents(
         action = "updated" if changed else "unchanged"
         result[action].append(data["title"])
 
-    stale_documents = [
-        document
-        for document in existing_documents
-        if document.id not in matched_ids
-    ]
-
-    for document in stale_documents:
-        if delete_missing:
+    # Remove database rows for files that are no longer in knowledge_docs.
+    for document in existing_documents:
+        if document.source not in incoming_sources:
             db.delete(document)
             result["deleted"].append(document.title)
-        else:
-            result["stale"].append(document.title)
 
     return result
-
