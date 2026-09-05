@@ -42,8 +42,7 @@ def main() -> None:
                 _build_embedding_input(document.title, chunk)
                 for chunk in chunks
             ]
-            # One API call embeds all of this document's chunks; order
-            # of the result matches the order of embedding_inputs.
+
             embeddings = create_embeddings(embedding_inputs)
 
             # Guard against a silent chunk/embedding mismatch before
@@ -66,8 +65,7 @@ def main() -> None:
             total_chunks += len(chunks)
             print(f"{document.title}: {len(chunks)} chunks")
 
-        # Everything above is staged in memory; this is the only point
-        # the database is actually changed.
+
         db.commit()
         print(f"Indexed {len(documents)} documents into {total_chunks} chunks")
     finally:
